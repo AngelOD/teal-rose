@@ -1,5 +1,3 @@
-// +build go1.9
-
 package main
 
 import (
@@ -9,18 +7,20 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func SocketServer(port int) {
 	listen, err := net.Listen("tcp4", ":"+strconv.Itoa(port))
-	defer listen.Close()
 
 	if err != nil {
-		log.Fatalf("Socket listen port %d failed, %s", port, err)
+		log.Fatalf("Error starting server, %s", err)
 		os.Exit(1)
 	}
 
-	log.Printf("Begin listen port: %d", port)
+	defer listen.Close()
+
+	log.Println("Server running. Awaiting connections...")
 
 	for {
 		conn, err := listen.Accept()
@@ -37,10 +37,14 @@ func SocketServer(port int) {
 func handler(conn net.Conn) {
 	defer conn.Close()
 
+	var sb strings.Builder
+
 	var (
 		buf = make([]byte, 1024)
 		r   = bufio.NewReader(conn)
 	)
+
+	log.Printf("Connection established (%s)\nAwaiting data...", conn.RemoteAddr())
 
 ILOOP:
 
@@ -52,7 +56,19 @@ ILOOP:
 		case io.EOF:
 			break ILOOP
 		case nil:
-			log.Println("Receive: ", data)
+			sb.WriteString(data)
+			if isTransportOver(data) {
+				rd := ParseData(sb.String())
+
+				log.Printf("Received: %+v\n", rd)
+
+				if saveData {
+					// TODO: Save data
+					log.Println("ERROR! Unable to save data!")
+				}
+
+				sb.Reset()
+			}
 		default:
 			log.Fatalf("Receive data failed: %s", err)
 			return
@@ -60,4 +76,9 @@ ILOOP:
 	}
 
 	log.Printf("Done!")
+}
+
+func isTransportOver(data string) (over bool) {
+	over = strings.HasSuffix(data, "\n")
+	return
 }
