@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	port     = 3333
-	saveData = false
-	dbData   = map[string]string{
+	port      = 3333
+	saveData  = false
+	saveEvery = 10
+	dbData    = map[string]string{
 		"DB_NAME": "teal_rose",
 		"DB_USER": "teal_rose",
 		"DB_PASS": "",

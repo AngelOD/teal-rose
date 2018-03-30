@@ -106,6 +106,10 @@ func ParseData(data string) (rd RadioData) {
 	return
 }
 
+func (v Vector3) String() string {
+	return fmt.Sprintf("%d %d %d", v.X, v.Y, v.Z)
+}
+
 func (sd SensorData) GetSensorType() (st SensorType, oerr error) {
 	val, err := strconv.Atoi(sd.SensorType)
 

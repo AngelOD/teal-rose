@@ -40,8 +40,9 @@ func handler(conn net.Conn) {
 	var sb strings.Builder
 
 	var (
-		buf = make([]byte, 1024)
-		r   = bufio.NewReader(conn)
+		buf       = make([]byte, 1024)
+		r         = bufio.NewReader(conn)
+		saveQueue = make([]RadioData, 0, saveEvery)
 	)
 
 	log.Printf("Connection established (%s)\nAwaiting data...", conn.RemoteAddr())
@@ -63,8 +64,18 @@ ILOOP:
 				log.Printf("Received: %+v\n", rd)
 
 				if saveData {
-					// TODO: Save data
-					log.Println("ERROR! Unable to save data!")
+					if len(rd.Sensors) > 0 {
+						saveQueue = append(saveQueue, rd)
+
+						if len(saveQueue) >= saveEvery {
+							if StoreData(saveQueue) {
+								log.Println("Data saved successfully!")
+								saveQueue = nil
+							} else {
+								log.Println("ERROR! Unable to save data!")
+							}
+						}
+					}
 				}
 
 				sb.Reset()

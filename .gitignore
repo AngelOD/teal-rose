@@ -15,5 +15,6 @@
 
 # JetBrains and more
 .idea/
+vendor/
 _dist/
 .env
