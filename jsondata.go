@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+//go:generate stringer -type=SensorType
 type SensorType int
 
 const (
@@ -21,7 +22,7 @@ const (
 	ST_LSM9DS1TR_MAG
 	ST_LSM9DS1TR_ACC
 	ST_LSM9DS1TR_GYRO
-	ST_COMBINED SensorType = 999
+	ST_MAX_MARKER
 )
 
 type SensorData struct {
@@ -111,9 +112,9 @@ func (v Vector3) String() string {
 }
 
 func (sd SensorData) GetSensorType() (st SensorType, oerr error) {
-	val, err := strconv.Atoi(sd.SensorType)
+	val, err := strconv.ParseInt(sd.SensorType, 16, 64)
 
-	if err != nil {
+	if err != nil || val < 0 || val >= int64(ST_MAX_MARKER) {
 		val = -1
 	}
 
