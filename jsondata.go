@@ -95,13 +95,6 @@ type RadioData struct {
 	Sensors     []SensorData `json:"Sensors"`
 }
 
-func TestJson() {
-	testData := `{ "payloadlength": 92, "combined_rssi_snr": -33.75, "sequencenumber": 50, "TimeStamp": "2018-03-19 13:27:22.087292", "node_mac_address": "0000000A", "TimeStampTZ": "2018-03-19T13:27:22.087451+01:00", "radiobusid": 2, "SNR": 41, "RSSI": 113, "spreadingfactor": 8, "Sensors": [ { "SensorType": "00", "Length": "02", "VBat": 407, "SensorIndex": "00" }, { "SensorType": "01", "Length": "02", "VCC": 287, "SensorIndex": "00" }, { "SensorType": "02", "Temp_STS31": 2268, "Length": "02", "SensorIndex": "00" }, { "Humidity_BME280": 18930, "SensorType": "04", "Length": "0C", "Pressure_BME280": 101304, "Temp_BME280": 2355, "SensorIndex": "00" }, { "SensorType": "05", "Length": "0C", "CO2": 414, "TVOC": 2, "SensorIndex": "00" }, { "SensorType": "06", "Light": 8, "Length": "08", "UV": 0, "SensorIndex": "00" }, { "SensorType": "07", "Soundpressure": 66, "Length": "02", "SensorIndex": "00" }, { "SensorType": "08", "Length": "01", "Port_Input": 193, "SensorIndex": "00" }, { "Mag_X": 62376, "SensorType": "09", "Length": "06", "Mag_Y": 2842, "SensorIndex": "00", "Mag_Z": 63022 }, { "SensorIndex": "00", "SensorType": "0A", "Length": "06", "Acc_Z": 16040, "Acc_Y": 65469, "Acc_X": 65218 }, { "SensorType": "0B", "Length": "06", "Gyro_Z": 107, "Gyro_X": 34, "Gyro_Y": 130, "SensorIndex": "00" } ], "packet_type": 1, "payload": "0000020197010002011F02000208DC04000C00000933000049F200018BB805000C019E0002000000000000000006000800000008000000000700020042080001C1090006F3A80B1AF62E0A0006FEC2FFBD3EA80B000600220082006B", "channel": 0}`
-	data := ParseData(testData)
-
-	fmt.Printf("Combined: %+v\n", data.GetSensorData())
-}
-
 func ParseData(data string) (rd RadioData) {
 	json.Unmarshal([]byte(data), &rd)
 	return
