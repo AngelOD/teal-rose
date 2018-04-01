@@ -81,7 +81,7 @@ ILOOP:
 				sb.Reset()
 			}
 		default:
-			log.Fatalf("Receive data failed: %s", err)
+			log.Printf("ERROR! Receive data failed: %s", err)
 			return
 		}
 	}
