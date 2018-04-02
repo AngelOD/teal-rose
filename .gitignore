@@ -15,6 +15,7 @@
 
 # JetBrains and more
 .idea/
+.vscode/
 vendor/
 _dist/
 .env
