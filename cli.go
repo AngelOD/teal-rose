@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/alexsasharegan/dotenv"
-	"github.com/teris-io/cli"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/alexsasharegan/dotenv"
+	"github.com/teris-io/cli"
 )
 
 var (

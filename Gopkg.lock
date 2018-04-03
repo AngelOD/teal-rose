@@ -14,14 +14,38 @@
   version = "v1.3"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/kardianos/osext"
+  packages = ["."]
+  revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kardianos/service"
+  packages = ["."]
+  revision = "615a14ed75099c9eaac6949e22ac2341bf9d3197"
+
+[[projects]]
   name = "github.com/teris-io/cli"
   packages = ["."]
   revision = "903598a017880e40a9edea0b45eabf00ff24ab60"
   version = "v1.0.1"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = [
+    "windows",
+    "windows/registry",
+    "windows/svc",
+    "windows/svc/eventlog",
+    "windows/svc/mgr"
+  ]
+  revision = "378d26f46672a356c46195c28f61bdb4c0a781dd"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3425509c72336d7821447f9ed2a00e3eefff455d57f3e6012655f8df8e74e038"
+  inputs-digest = "f00221a4e6b8dc1bc06e3ddcad051cd39fea84c585af1d579d8f37548656abbe"
   solver-name = "gps-cdcl"
   solver-version = 1
