@@ -3,30 +3,42 @@ package main
 import (
 	"bufio"
 	"io"
-	"log"
 	"net"
-	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
-func SocketServer(port int) {
+func SocketServer(port int, prg *program) {
 	listen, err := net.Listen("tcp4", ":"+strconv.Itoa(port))
 
 	if err != nil {
-		log.Fatalf("Error starting server, %s", err)
-		os.Exit(1)
+		logger.Errorf("Error starting server, %s", err)
+		return
 	}
 
 	defer listen.Close()
 
-	log.Println("Server running. Awaiting connections...")
+	logger.Info("Server running. Awaiting connections...")
 
 	for {
+		select {
+		case <-prg.exit:
+			return
+		default:
+			// Do nothing
+		}
+
+		listen.(*net.TCPListener).SetDeadline(time.Now().Add(1 * time.Second))
 		conn, err := listen.Accept()
 
 		if err != nil {
-			log.Fatalln(err)
+			oerr, ok := err.(*net.OpError)
+
+			if !ok || !oerr.Timeout() {
+				logger.Error(err)
+			}
+
 			continue
 		}
 
@@ -45,7 +57,7 @@ func handler(conn net.Conn) {
 		saveQueue = make([]RadioData, 0, saveEvery)
 	)
 
-	log.Printf("Connection established (%s)\nAwaiting data...", conn.RemoteAddr())
+	logger.Infof("Connection established (%s)\nAwaiting data...", conn.RemoteAddr())
 
 ILOOP:
 
@@ -61,7 +73,7 @@ ILOOP:
 			if isTransportOver(data) {
 				rd := ParseData(sb.String())
 
-				log.Printf("Received: %+v\n", rd)
+				logger.Infof("Received: %+v\n", rd)
 
 				if saveData {
 					if len(rd.Sensors) > 0 {
@@ -69,10 +81,10 @@ ILOOP:
 
 						if len(saveQueue) >= saveEvery {
 							if StoreData(saveQueue) {
-								log.Println("Data saved successfully!")
+								logger.Info("Data saved successfully!")
 								saveQueue = nil
 							} else {
-								log.Println("ERROR! Unable to save data!")
+								logger.Info("ERROR! Unable to save data!")
 							}
 						}
 					}
@@ -81,12 +93,12 @@ ILOOP:
 				sb.Reset()
 			}
 		default:
-			log.Printf("ERROR! Receive data failed: %s", err)
+			logger.Infof("ERROR! Receive data failed: %s", err)
 			return
 		}
 	}
 
-	log.Printf("Done!")
+	logger.Info("Done!")
 }
 
 func isTransportOver(data string) (over bool) {

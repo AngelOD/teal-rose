@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"log"
 )
 
 func StoreData(rds []RadioData) bool {
@@ -17,7 +16,7 @@ func StoreData(rds []RadioData) bool {
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", dbData["DB_USER"], dbData["DB_PASS"], dbData["DB_NAME"]))
 
 	if err != nil {
-		log.Fatalf("Error connecting to DB: %s", err)
+		logger.Errorf("Error connecting to DB: %s", err)
 		return false
 	}
 	defer db.Close()
@@ -32,11 +31,11 @@ func StoreData(rds []RadioData) bool {
 	defer stmtInsert.Close()
 
 	if err != nil {
-		log.Fatalf("Error preparing statement: %s", err)
+		logger.Errorf("Error preparing statement: %s", err)
 		return false
 	}
 
-	log.Printf("Statement prepared. Inserting data...\n")
+	logger.Infof("Statement prepared. Inserting data...\n")
 
 	for i := 0; i < len(rds); i++ {
 		rd = rds[i]
@@ -50,7 +49,7 @@ func StoreData(rds []RadioData) bool {
 		)
 
 		if err != nil {
-			log.Fatalf("ERROR! Failed after %d entries: %s", i, err)
+			logger.Errorf("ERROR! Failed after %d entries: %s", i, err)
 			return false
 		}
 	}

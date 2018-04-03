@@ -1,11 +1,11 @@
 package main
 
 import (
-	"log"
 	"os"
 	"strconv"
 
 	"github.com/alexsasharegan/dotenv"
+	"github.com/kardianos/service"
 	"github.com/teris-io/cli"
 )
 
@@ -21,10 +21,19 @@ var (
 )
 
 func setupCli() cli.App {
+	cmdService := cli.NewCommand("service", "Manage service").
+		WithShortcut("srv").
+		WithArg(cli.NewArg("command", "The service subcommand")).
+		WithAction(handleServerCli)
+
 	optPort := cli.NewOption("port", "Port to host on").WithType(cli.TypeInt)
 	optStoreData := cli.NewOption("save", "Store information in DB").WithChar('s').WithType(cli.TypeBool)
 
-	app := cli.New("SW802F18 Test Server").WithOption(optPort).WithOption(optStoreData).WithAction(handleCli)
+	app := cli.New("SW802F18 Test Server").
+		WithCommand(cmdService).
+		WithOption(optPort).
+		WithOption(optStoreData).
+		WithAction(handleCli)
 
 	return app
 }
@@ -45,25 +54,43 @@ func handleCli(args []string, options map[string]string) int {
 				dbData[keys[i]] = val
 			} else {
 				if len(dbData[keys[i]]) == 0 {
-					log.Fatalf("Variable %s required but missing!", keys[i])
+					logger.Errorf("Variable %s required but missing!", keys[i])
 					return 2
 				}
 			}
 		}
 	}
 
-	log.Println("Using port number: ", port)
+	logger.Info("Using port number: ", port)
 
 	if saveData {
-		log.Println("Will save incoming data to DB.")
-		log.Printf("Name: %s\n", dbData["DB_NAME"])
-		log.Printf("User: %s\n", dbData["DB_USER"])
-		log.Printf("Pass: HIDDEN [%d]", len(dbData["DB_PASS"]))
+		logger.Info("Will save incoming data to DB.")
+		logger.Infof("Name: %s\n", dbData["DB_NAME"])
+		logger.Infof("User: %s\n", dbData["DB_USER"])
+		logger.Infof("Pass: HIDDEN [%d]", len(dbData["DB_PASS"]))
 	} else {
-		log.Println("Will discard incoming data.")
+		logger.Info("Will discard incoming data.")
 	}
 
-	SocketServer(port)
+	err := svc.Run()
+
+	if err != nil {
+		logger.Error(err)
+		return 3
+	}
+
+	//SocketServer(port)
+
+	return 0
+}
+
+func handleServerCli(args []string, options map[string]string) int {
+	err := service.Control(svc, args[0])
+
+	if err != nil {
+		logger.Infof("Valid actions: %q\n", service.ControlAction)
+		logger.Error(err)
+	}
 
 	return 0
 }

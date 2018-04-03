@@ -2,20 +2,18 @@ package main
 
 import (
 	"github.com/kardianos/service"
-	"time"
 	"log"
 )
 
 type Config struct {
 	Name, DisplayName, Description string
-
-	Stderr, Stdout string
 }
 
 var logger service.Logger
+var svc service.Service
 
 type program struct {
-	exit chan struct{}
+	exit    chan struct{}
 	service service.Service
 }
 
@@ -28,25 +26,14 @@ func (p *program) Start(s service.Service) error {
 
 	p.exit = make(chan struct{})
 	go p.run()
+
 	return nil
 }
 
-func (p *program) run() error {
+func (p *program) run() {
 	logger.Infof("I'm running. [%v]", service.Platform())
-	ticker := time.NewTicker(2 * time.Second)
 
-	for {
-		logger.Info("Checking...")
-
-		select {
-		case tm := <-ticker.C:
-			logger.Infof("Still running at %v...", tm)
-		case <-p.exit:
-			logger.Info("Triggered by exit!")
-			ticker.Stop()
-			return nil
-		}
-	}
+	SocketServer(port, p)
 }
 
 func (p *program) Stop(s service.Service) error {
@@ -55,26 +42,26 @@ func (p *program) Stop(s service.Service) error {
 	return nil
 }
 
-func initService() service.Service {
+func initService() {
 	svcConfig := &service.Config{
-		Name: "Sw802f18Receiver",
+		Name:        "Sw802f18Receiver",
 		DisplayName: "SW802F18 Sensor Data Receiver",
 		Description: "Listens on a specific port and receives data from sensor clusters.",
-		Arguments: []string{"-s"},
+		Arguments:   []string{"-s"},
 	}
 
 	prg := &program{}
 	s, err := service.New(prg, svcConfig)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	errs := make(chan error, 5)
 	logger, err = s.Logger(errs)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	prg.service = s
@@ -83,10 +70,10 @@ func initService() service.Service {
 		for {
 			err := <-errs
 			if err != nil {
-				log.Print(err)
+				logger.Error(err)
 			}
 		}
 	}()
 
-	return s
+	svc = s
 }

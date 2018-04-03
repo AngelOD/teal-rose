@@ -4,7 +4,7 @@ import "testing"
 
 func TestGetSensorTypeToReturnCorrectType(t *testing.T) {
 	tables := []struct {
-		input string
+		input  string
 		output SensorType
 	}{
 		{"00", ST_VBAT},
@@ -49,7 +49,7 @@ func TestGetSensorTypeToReturnCorrectType(t *testing.T) {
 }
 
 func TestGetSensorTypeToReturnMinusOneIfNotFound(t *testing.T) {
-	testCases := []string {
+	testCases := []string{
 		"-01", "-1", "0C", "C", "0D", "D", "FF", "0100", "100",
 	}
 
