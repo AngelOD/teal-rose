@@ -3,11 +3,11 @@ package main
 import (
 	"bufio"
 	"io"
+	"log"
 	"net"
 	"strconv"
 	"strings"
 	"time"
-	"log"
 )
 
 func SocketServer(port int, prg *program) {
@@ -58,7 +58,8 @@ func handler(conn net.Conn) {
 		saveQueue = make([]RadioData, 0, saveEvery)
 	)
 
-	logger.Infof("Connection established (%s)\nAwaiting data...", conn.RemoteAddr())
+	logger.Infof("Connection established (%s)", conn.RemoteAddr())
+	logger.Info("Awaiting data...")
 
 ILOOP:
 

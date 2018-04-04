@@ -1,19 +1,19 @@
 package main
 
 import (
-	"strconv"
 	"path/filepath"
+	"strconv"
 
 	"github.com/alexsasharegan/dotenv"
+	"github.com/kardianos/osext"
 	"github.com/kardianos/service"
 	"github.com/teris-io/cli"
-	"github.com/kardianos/osext"
 )
 
 var (
 	port      = 3333
 	saveData  = false
-	saveEvery = 10
+	saveEvery = 5
 	dbData    = map[string]string{
 		"DB_NAME": "teal_rose",
 		"DB_USER": "teal_rose",

@@ -34,16 +34,22 @@ func (p *program) Start(s service.Service) error {
 func (p *program) run() {
 	logger.Infof("I'm running. [%v]", service.Platform())
 
-	if service.Interactive() {
+	if !service.Interactive() {
 		fileName, err := getConfigPath("output.log")
 		if err == nil {
 			f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err == nil {
+				logger.Infof("Using log file: %s", fileName)
 				defer f.Close()
 				log.SetOutput(f)
+			} else {
+				logger.Warning(err)
 			}
+		} else {
+			logger.Warning(err)
 		}
-
+	} else {
+		logger.Info("Outputting log to standard out.")
 	}
 
 	SocketServer(port, p)

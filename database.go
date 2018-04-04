@@ -40,6 +40,12 @@ func StoreData(rds []RadioData) bool {
 	for i := 0; i < len(rds); i++ {
 		rd = rds[i]
 		sd = rd.GetSensorData()
+
+		if sd.Pressure == 0 {
+			logger.Warning("Pressure is 0, ignoring row.")
+			continue
+		}
+
 		_, err = stmtInsert.Exec(
 			rd.RadioBusId, rd.Channel, rd.NodeMacAddress, rd.PacketType, rd.SequenceNumber,
 			rd.Timestamp, rd.TimestampTz, sd.VBat, sd.Vcc, sd.Temperature,
