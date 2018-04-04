@@ -1,12 +1,13 @@
 package main
 
 import (
-	"os"
 	"strconv"
+	"path/filepath"
 
 	"github.com/alexsasharegan/dotenv"
 	"github.com/kardianos/service"
 	"github.com/teris-io/cli"
+	"github.com/kardianos/osext"
 )
 
 var (
@@ -47,10 +48,20 @@ func handleCli(args []string, options map[string]string) int {
 		keys := []string{"DB_NAME", "DB_USER", "DB_PASS"}
 		saveData = true
 
-		dotenv.Load()
+		envPath, err := getConfigPath(".env")
+		if err != nil {
+			logger.Error(err)
+			return 2
+		}
+
+		env, err := dotenv.ReadFile(envPath)
+		if err != nil {
+			logger.Error(err)
+			return 2
+		}
 
 		for i := 0; i < len(keys); i++ {
-			if val, ok := os.LookupEnv(keys[i]); ok && len(val) > 0 {
+			if val, prs := env[keys[i]]; prs && len(val) > 0 {
 				dbData[keys[i]] = val
 			} else {
 				if len(dbData[keys[i]]) == 0 {
@@ -76,10 +87,8 @@ func handleCli(args []string, options map[string]string) int {
 
 	if err != nil {
 		logger.Error(err)
-		return 3
+		return 2
 	}
-
-	//SocketServer(port)
 
 	return 0
 }
@@ -93,4 +102,15 @@ func handleServerCli(args []string, options map[string]string) int {
 	}
 
 	return 0
+}
+
+func getConfigPath(fileName string) (string, error) {
+	fullexecpath, err := osext.Executable()
+	if err != nil {
+		return "", err
+	}
+
+	dir, _ := filepath.Split(fullexecpath)
+
+	return filepath.Join(dir, fileName), nil
 }

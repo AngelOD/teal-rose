@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/kardianos/service"
 	"log"
+	"os"
 )
 
 type Config struct {
@@ -32,6 +33,18 @@ func (p *program) Start(s service.Service) error {
 
 func (p *program) run() {
 	logger.Infof("I'm running. [%v]", service.Platform())
+
+	if service.Interactive() {
+		fileName, err := getConfigPath("output.log")
+		if err == nil {
+			f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err == nil {
+				defer f.Close()
+				log.SetOutput(f)
+			}
+		}
+
+	}
 
 	SocketServer(port, p)
 }

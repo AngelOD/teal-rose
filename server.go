@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"log"
 )
 
 func SocketServer(port int, prg *program) {
@@ -73,7 +74,7 @@ ILOOP:
 			if isTransportOver(data) {
 				rd := ParseData(sb.String())
 
-				logger.Infof("Received: %+v\n", rd)
+				log.Printf("Received: %+v\n", rd)
 
 				if saveData {
 					if len(rd.Sensors) > 0 {
@@ -81,10 +82,10 @@ ILOOP:
 
 						if len(saveQueue) >= saveEvery {
 							if StoreData(saveQueue) {
-								logger.Info("Data saved successfully!")
+								log.Println("Data saved successfully!")
 								saveQueue = nil
 							} else {
-								logger.Info("ERROR! Unable to save data!")
+								log.Println("ERROR! Unable to save data!")
 							}
 						}
 					}
@@ -93,7 +94,7 @@ ILOOP:
 				sb.Reset()
 			}
 		default:
-			logger.Infof("ERROR! Receive data failed: %s", err)
+			log.Printf("ERROR! Receive data failed: %s\n", err)
 			return
 		}
 	}
