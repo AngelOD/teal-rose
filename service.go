@@ -34,7 +34,7 @@ func (p *program) Start(s service.Service) error {
 func (p *program) run() {
 	logger.Infof("I'm running. [%v]", service.Platform())
 
-	if !service.Interactive() {
+	if debugLog && !service.Interactive() {
 		fileName, err := getConfigPath("output.log")
 		if err == nil {
 			f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -48,7 +48,7 @@ func (p *program) run() {
 		} else {
 			logger.Warning(err)
 		}
-	} else {
+	} else if debugLog {
 		logger.Info("Outputting log to standard out.")
 	}
 
@@ -66,7 +66,7 @@ func initService() {
 		Name:        "Sw802f18Receiver",
 		DisplayName: "SW802F18 Sensor Data Receiver",
 		Description: "Listens on a specific port and receives data from sensor clusters.",
-		Arguments:   []string{"-s"},
+		Arguments:   []string{"run", "-s"},
 	}
 
 	prg := &program{}

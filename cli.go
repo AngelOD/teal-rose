@@ -12,6 +12,7 @@ import (
 
 var (
 	port      = 3333
+	debugLog  = false
 	saveData  = false
 	saveEvery = 5
 	dbData    = map[string]string{
@@ -27,14 +28,19 @@ func setupCli() cli.App {
 		WithArg(cli.NewArg("command", "The service subcommand")).
 		WithAction(handleServerCli)
 
+	optDebug := cli.NewOption("debug", "Log debug information").WithChar('d').WithType(cli.TypeBool)
 	optPort := cli.NewOption("port", "Port to host on").WithType(cli.TypeInt)
 	optStoreData := cli.NewOption("save", "Store information in DB").WithChar('s').WithType(cli.TypeBool)
 
-	app := cli.New("SW802F18 Test Server").
-		WithCommand(cmdService).
+	cmdRun := cli.NewCommand("run", "Normal run").
+		WithOption(optDebug).
 		WithOption(optPort).
 		WithOption(optStoreData).
 		WithAction(handleCli)
+
+	app := cli.New("SW802F18 Test Server").
+		WithCommand(cmdService).
+		WithCommand(cmdRun)
 
 	return app
 }
@@ -42,6 +48,10 @@ func setupCli() cli.App {
 func handleCli(args []string, options map[string]string) int {
 	if pPort, err := strconv.Atoi(options["port"]); err == nil && pPort > 1024 && pPort <= 65535 {
 		port = pPort
+	}
+
+	if pDebug, err := strconv.ParseBool(options["debug"]);err == nil && pDebug {
+		debugLog = true
 	}
 
 	if pSave, err := strconv.ParseBool(options["save"]); err == nil && pSave {
@@ -73,6 +83,12 @@ func handleCli(args []string, options map[string]string) int {
 	}
 
 	logger.Info("Using port number: ", port)
+
+	if debugLog {
+		logger.Info("Debug logging enabled")
+	} else {
+		logger.Info("Debug logging disabled")
+	}
 
 	if saveData {
 		logger.Info("Will save incoming data to DB.")

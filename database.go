@@ -41,7 +41,7 @@ func StoreData(rds []RadioData) bool {
 		rd = rds[i]
 		sd = rd.GetSensorData()
 
-		if sd.Pressure == 0 {
+		if shouldDiscardData(&sd) {
 			logger.Warning("Pressure is 0, ignoring row.")
 			continue
 		}
@@ -66,4 +66,8 @@ func StoreData(rds []RadioData) bool {
 func EnsureDataTable() bool {
 	// TODO Complete this
 	return true
+}
+
+func shouldDiscardData(sd *SensorDataCombined) bool {
+	return sd.Pressure == 0 || sd.Humidity == 0 || sd.Temperature == 0 || sd.Co2 == 0
 }

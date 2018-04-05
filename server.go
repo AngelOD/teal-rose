@@ -75,7 +75,9 @@ ILOOP:
 			if isTransportOver(data) {
 				rd := ParseData(sb.String())
 
-				log.Printf("Received: %+v\n", rd)
+				if debugLog {
+					log.Printf("Received: %+v\n", rd)
+				}
 
 				if saveData {
 					if len(rd.Sensors) > 0 {
@@ -83,9 +85,12 @@ ILOOP:
 
 						if len(saveQueue) >= saveEvery {
 							if StoreData(saveQueue) {
-								log.Println("Data saved successfully!")
+								if debugLog {
+									log.Println("Data saved successfully!")
+								}
+
 								saveQueue = nil
-							} else {
+							} else if debugLog {
 								log.Println("ERROR! Unable to save data!")
 							}
 						}
@@ -95,7 +100,10 @@ ILOOP:
 				sb.Reset()
 			}
 		default:
-			log.Printf("ERROR! Receive data failed: %s\n", err)
+			if debugLog {
+				log.Printf("ERROR! Receive data failed: %s\n", err)
+			}
+
 			return
 		}
 	}
