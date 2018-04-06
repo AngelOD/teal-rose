@@ -66,7 +66,7 @@ func initService() {
 		Name:        "Sw802f18Receiver",
 		DisplayName: "SW802F18 Sensor Data Receiver",
 		Description: "Listens on a specific port and receives data from sensor clusters.",
-		Arguments:   []string{"run", "-s"},
+		Arguments:   []string{"run", "-s", "-d"},
 	}
 
 	prg := &program{}
