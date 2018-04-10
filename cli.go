@@ -137,6 +137,12 @@ func loadDotEnv() bool {
 		return false
 	}
 
+	if debugVal, prs := env["DEBUG"]; prs {
+		if pDebugVal, err := strconv.ParseBool(debugVal); err == nil {
+			debugLog = pDebugVal
+		}
+	}
+
 	return true
 }
 
