@@ -4,7 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"time"
 )
+
+const RFC3339Micro = "2006-01-02T15:04:05.000000Z07:00"
 
 func StoreData(rds []RadioData) bool {
 	if len(rds) < 1 {
@@ -23,7 +26,7 @@ func StoreData(rds []RadioData) bool {
 
 	stmtInsert, err := db.Prepare("INSERT INTO radio_datas (" +
 		"`radio_bus_id`, `channel`, `node_mac_address`, `packet_type`, `sequence_number`," +
-		"`timestamp`, `timestamp_tz`, `v_bat`, `vcc`, `temperature`," +
+		"`timestamp_nano`, `timestamp_tz`, `v_bat`, `vcc`, `temperature`," +
 		"`humidity`, `pressure`, `co2`, `tvoc`, `light`," +
 		"`uv`, `sound_pressure`, `port_input`, `mag`, `acc`," +
 		"`gyro`) VALUES (" +
@@ -42,13 +45,20 @@ func StoreData(rds []RadioData) bool {
 		sd = rd.GetSensorData()
 
 		if shouldDiscardData(&sd) {
-			logger.Warning("Pressure is 0, ignoring row.")
+			logger.Warning("Invalid data. Ignoring row.")
+			continue
+		}
+
+		t, err := time.Parse(RFC3339Micro, rd.TimestampTz)
+		if err != nil {
+			logger.Warningf("Unable to convert time string: %s", rd.TimestampTz)
+			logger.Warningf("Because of: %s", err)
 			continue
 		}
 
 		_, err = stmtInsert.Exec(
 			rd.RadioBusId, rd.Channel, rd.NodeMacAddress, rd.PacketType, rd.SequenceNumber,
-			rd.Timestamp, rd.TimestampTz, sd.VBat, sd.Vcc, sd.Temperature,
+			t.UnixNano(), rd.TimestampTz, sd.VBat, sd.Vcc, sd.Temperature,
 			sd.Humidity, sd.Pressure, sd.Co2, sd.Tvoc, sd.Light,
 			sd.Uv, sd.SoundPressure, sd.PortInput, sd.Mag.String(), sd.Acc.String(),
 			sd.Gyro.String(),

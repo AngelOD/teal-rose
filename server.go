@@ -76,7 +76,8 @@ ILOOP:
 				rd := ParseData(sb.String())
 
 				if debugLog {
-					log.Printf("Received: %+v\n", rd)
+					log.Printf("Received: %+v\n", sb.String())
+					log.Printf("Parsed: %+v\n\n", rd)
 				}
 
 				if saveData {
