@@ -12,6 +12,7 @@ type Config struct {
 
 var logger service.Logger
 var svc service.Service
+var prg *program
 
 type program struct {
 	exit    chan struct{}
@@ -69,7 +70,7 @@ func initService() {
 		Arguments:   []string{"run", "-s", "-d"},
 	}
 
-	prg := &program{}
+	prg = &program{}
 	s, err := service.New(prg, svcConfig)
 
 	if err != nil {
@@ -87,9 +88,16 @@ func initService() {
 
 	go func() {
 		for {
-			err := <-errs
-			if err != nil {
-				logger.Error(err)
+			select {
+			case err := <-errs:
+				if err != nil {
+					logger.Error(err)
+				}
+			case <-prg.exit:
+				logger.Info("Shutting down error logging interface.")
+				return
+			default:
+				// Do nothing
 			}
 		}
 	}()

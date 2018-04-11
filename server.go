@@ -55,7 +55,6 @@ func handler(conn net.Conn) {
 	var (
 		buf       = make([]byte, 1024)
 		r         = bufio.NewReader(conn)
-		saveQueue = make([]RadioData, 0, saveEvery)
 	)
 
 	logger.Infof("Connection established (%s)", conn.RemoteAddr())
@@ -82,19 +81,7 @@ ILOOP:
 
 				if saveData {
 					if len(rd.Sensors) > 0 {
-						saveQueue = append(saveQueue, rd)
-
-						if len(saveQueue) >= saveEvery {
-							if StoreData(saveQueue) {
-								if debugLog {
-									log.Println("Data saved successfully!")
-								}
-
-								saveQueue = nil
-							} else if debugLog {
-								log.Println("ERROR! Unable to save data!")
-							}
-						}
+						rdStore <-rd
 					}
 				}
 

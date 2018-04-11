@@ -90,7 +90,7 @@ type RadioData struct {
 	//PayloadLength   int          `json:"payloadlength"`
 	//Payload         string       `json:"payload"`
 	//CombinedRssiSnr float64      `json:"combined_rssi_snr"`
-	Timestamp   string       `json:"TimeStamp"`
+	//Timestamp   string       `json:"TimeStamp"`
 	TimestampTz string       `json:"TimeStampTZ"`
 	Sensors     []SensorData `json:"Sensors"`
 }

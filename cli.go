@@ -22,7 +22,7 @@ var (
 	}
 )
 
-var env map[string]string;
+var env map[string]string
 
 func setupCli() cli.App {
 	optDebug := cli.NewOption("debug", "Log debug information").WithChar('d').WithType(cli.TypeBool)
@@ -52,7 +52,7 @@ func handleCommonCli(args []string, options map[string]string) int {
 		port = pPort
 	}
 
-	if pDebug, err := strconv.ParseBool(options["debug"]);err == nil && pDebug {
+	if pDebug, err := strconv.ParseBool(options["debug"]); err == nil && pDebug {
 		debugLog = true
 	}
 
@@ -95,6 +95,7 @@ func handleCli(args []string, options map[string]string) int {
 	}
 
 	if saveData {
+		storeDataRunner()
 		logger.Info("Will save incoming data to DB.")
 		logger.Infof("Name: %s\n", dbData["DB_NAME"])
 		logger.Infof("User: %s\n", dbData["DB_USER"])
