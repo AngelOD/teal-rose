@@ -95,7 +95,8 @@ func handleCli(args []string, options map[string]string) int {
 	}
 
 	if saveData {
-		storeDataRunner()
+		go storeDataRunner()
+
 		logger.Info("Will save incoming data to DB.")
 		logger.Infof("Name: %s\n", dbData["DB_NAME"])
 		logger.Infof("User: %s\n", dbData["DB_USER"])
