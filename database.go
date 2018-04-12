@@ -78,7 +78,7 @@ func storeDataRunner() {
 			logger.Info("Shutting down storeDataRunner.")
 			return
 		default:
-			// Do nothing
+			time.Sleep(10 * time.Second)
 		}
 	}
 }

@@ -14,7 +14,6 @@ var (
 	port      = 3333
 	debugLog  = false
 	saveData  = false
-	saveEvery = 5
 	dbData    = map[string]string{
 		"DB_NAME": "teal_rose",
 		"DB_USER": "teal_rose",

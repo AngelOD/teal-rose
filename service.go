@@ -4,6 +4,7 @@ import (
 	"github.com/kardianos/service"
 	"log"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -97,7 +98,7 @@ func initService() {
 				logger.Info("Shutting down error logging interface.")
 				return
 			default:
-				// Do nothing
+				time.Sleep(10 * time.Second)
 			}
 		}
 	}()
