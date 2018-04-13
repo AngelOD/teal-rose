@@ -7,19 +7,6 @@ import (
 	"time"
 )
 
-type Config struct {
-	Name, DisplayName, Description string
-}
-
-var logger service.Logger
-var svc service.Service
-var prg *program
-
-type program struct {
-	exit    chan struct{}
-	service service.Service
-}
-
 func (p *program) Start(s service.Service) error {
 	if service.Interactive() {
 		logger.Info("Running in terminal.")

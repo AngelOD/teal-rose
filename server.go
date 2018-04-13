@@ -53,8 +53,8 @@ func handler(conn net.Conn) {
 	var sb strings.Builder
 
 	var (
-		buf       = make([]byte, 1024)
-		r         = bufio.NewReader(conn)
+		buf = make([]byte, 1024)
+		r   = bufio.NewReader(conn)
 	)
 
 	logger.Infof("Connection established (%s)", conn.RemoteAddr())
@@ -81,7 +81,7 @@ ILOOP:
 
 				if saveData {
 					if len(rd.Sensors) > 0 {
-						rdStore <-rd
+						rdStore <- rd
 					}
 				}
 

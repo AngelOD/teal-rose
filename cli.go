@@ -10,21 +10,10 @@ import (
 	"github.com/teris-io/cli"
 )
 
-var (
-	port      = 3333
-	debugLog  = false
-	saveData  = false
-	dbData    = map[string]string{
-		"DB_NAME": "teal_rose",
-		"DB_USER": "teal_rose",
-		"DB_PASS": "",
-	}
-)
-
-var env map[string]string
-
 func setupCli() cli.App {
 	optDebug := cli.NewOption("debug", "Log debug information").WithChar('d').WithType(cli.TypeBool)
+	optDomain := cli.NewOption("domain", "Domain name of service").WithChar('D').WithType(cli.TypeString)
+	optHost := cli.NewOption("host", "Host name of current host").WithChar('H').WithType(cli.TypeString)
 	optPort := cli.NewOption("port", "Port to host on").WithType(cli.TypeInt)
 	optStoreData := cli.NewOption("save", "Store information in DB").WithChar('s').WithType(cli.TypeBool)
 
@@ -35,6 +24,8 @@ func setupCli() cli.App {
 
 	cmdRun := cli.NewCommand("run", "Normal run").
 		WithOption(optDebug).
+		WithOption(optDomain).
+		WithOption(optHost).
 		WithOption(optPort).
 		WithOption(optStoreData).
 		WithAction(handleCli)
@@ -47,12 +38,20 @@ func setupCli() cli.App {
 }
 
 func handleCommonCli(args []string, options map[string]string) int {
-	if pPort, err := strconv.Atoi(options["port"]); err == nil && pPort > 1024 && pPort <= 65535 {
-		port = pPort
-	}
-
 	if pDebug, err := strconv.ParseBool(options["debug"]); err == nil && pDebug {
 		debugLog = true
+	}
+
+	if pDomain, prs := options["domain"]; prs {
+		domain = pDomain
+	}
+
+	if pHost, prs := options["host"]; prs {
+		host = pHost
+	}
+
+	if pPort, err := strconv.Atoi(options["port"]); err == nil && pPort > 1024 && pPort <= 65535 {
+		port = pPort
 	}
 
 	return 0
@@ -138,6 +137,7 @@ func loadDotEnv() bool {
 		return false
 	}
 
+	// Handle the vars that needs to be possible to apply through .env
 	if debugVal, prs := env["DEBUG"]; prs {
 		if pDebugVal, err := strconv.ParseBool(debugVal); err == nil {
 			debugLog = pDebugVal
