@@ -15,7 +15,16 @@ import (
 
 // for the current OS and architecture
 func Build() {
-	doBuild(runtime.GOOS, runtime.GOARCH)
+	mg.Deps(doGenerate)
+	mg.Deps(Test)
+	doBuild(runtime.GOOS, runtime.GOARCH, false)
+}
+
+// for debugging on the current OS and architecture
+func BuildDebug() {
+	mg.Deps(doGenerate)
+	mg.Deps(Test)
+	doBuild(runtime.GOOS, runtime.GOARCH, true)
 }
 
 // for all supported operating systems and architectures
@@ -24,11 +33,13 @@ func BuildAll() {
 	mg.Deps(BuildAll64)
 }
 
+// for all supported operating systems in 64 bit versions
 func BuildAll64() {
 	mg.Deps(BuildLinux)
 	mg.Deps(BuildWindows)
 }
 
+// for all supported operating systems in 32 bit versions
 func BuildAll32() {
 	mg.Deps(BuildLinux32)
 	mg.Deps(BuildWindows32)
@@ -38,28 +49,28 @@ func BuildAll32() {
 func BuildLinux() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("linux", "amd64")
+	doBuild("linux", "amd64", false)
 }
 
 // for the 386 architecture on Linux
 func BuildLinux32() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("linux", "386")
+	doBuild("linux", "386", false)
 }
 
 // for the amd64 architecture on Windows
 func BuildWindows() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("windows", "amd64")
+	doBuild("windows", "amd64", false)
 }
 
 // for the 386 architecture on Windows
 func BuildWindows32() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("windows", "386")
+	doBuild("windows", "386", false)
 }
 
 // runs all tests
@@ -69,7 +80,7 @@ func Test() {
 	sh.RunV("go", "test", "-v")
 }
 
-func doBuild(pOs string, pArch string) {
+func doBuild(pOs string, pArch string, pDebugBuild bool) {
 	fmt.Printf("Building for %s (%s)\n", pOs, pArch)
 
 	path := filepath.Join(getOutputPath(), fmt.Sprintf("%s_%s", pOs, pArch))
@@ -82,7 +93,13 @@ func doBuild(pOs string, pArch string) {
 	os.Setenv("GOOS", pOs)
 	os.Setenv("GOARCH", pArch)
 
-	sh.RunV("go", "build", "-o", path)
+	debugFlags := ""
+	if !pDebugBuild {
+		fmt.Println("Stripping debug info from executable")
+		debugFlags = "-ldflags=-s -w"
+	}
+
+	sh.RunV("go", "build", "-o", path, debugFlags)
 }
 
 func doGenerate() {
