@@ -42,6 +42,16 @@
   revision = "615a14ed75099c9eaac6949e22ac2341bf9d3197"
 
 [[projects]]
+  name = "github.com/magefile/mage"
+  packages = [
+    "mg",
+    "sh",
+    "types"
+  ]
+  revision = "771ebed3d686dce3d36cab4fc9ee55c295ed8905"
+  version = "2.1"
+
+[[projects]]
   name = "github.com/miekg/dns"
   packages = ["."]
   revision = "83c435cc65d2862736428b9b4d07d0ab10ad3e4d"
@@ -89,6 +99,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a95b03d11868f06d7ffd0078b60d65f0c579c3d78c1308e8d5748edc00358144"
+  inputs-digest = "e8347e6f37bd8949fc4263ba4755e4a61b3f72b3aa961593878ee38009a8c200"
   solver-name = "gps-cdcl"
   solver-version = 1
