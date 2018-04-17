@@ -3,13 +3,14 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func storeDataRunner() {
-	var rd RadioData
-	var sd SensorDataCombined
+	var rd radioData
+	var sd sensorDataCombined
 
 	logger.Info("Starting data storage thread.")
 
@@ -51,7 +52,7 @@ func storeDataRunner() {
 				continue
 			}
 
-			t, err := time.Parse(RFC3339Micro, rd.TimestampTz)
+			t, err := time.Parse(rfc3339Micro, rd.TimestampTz)
 			if err != nil {
 				logger.Warningf("Unable to convert time string: %s", rd.TimestampTz)
 				logger.Warningf("Because of: %s", err)
@@ -59,11 +60,11 @@ func storeDataRunner() {
 			}
 
 			_, err = stmtInsert.Exec(
-				rd.RadioBusId, rd.Channel, rd.NodeMacAddress, rd.PacketType, rd.SequenceNumber,
-				t.UnixNano(), rd.TimestampTz, sd.VBat, sd.Vcc, sd.Temperature,
-				sd.Humidity, sd.Pressure, sd.Co2, sd.Tvoc, sd.Light,
-				sd.Uv, sd.SoundPressure, sd.PortInput, sd.Mag.String(), sd.Acc.String(),
-				sd.Gyro.String(),
+				rd.RadioBusID, rd.Channel, rd.NodeMacAddress, rd.PacketType, rd.SequenceNumber,
+				t.UnixNano(), rd.TimestampTz, sd.vBat, sd.vcc, sd.temperature,
+				sd.humidity, sd.pressure, sd.co2, sd.tvoc, sd.light,
+				sd.uv, sd.soundPressure, sd.portInput, sd.mag.String(), sd.acc.String(),
+				sd.gyro.String(),
 			)
 
 			if err != nil {
@@ -79,11 +80,11 @@ func storeDataRunner() {
 	}
 }
 
-func EnsureDataTable() bool {
+func ensureDataTable() bool {
 	// TODO Complete this
 	return true
 }
 
-func shouldDiscardData(sd *SensorDataCombined) bool {
-	return sd.Pressure == 0 || sd.Humidity == 0 || sd.Temperature == 0 || sd.Co2 == 0
+func shouldDiscardData(sd *sensorDataCombined) bool {
+	return sd.pressure == 0 || sd.humidity == 0 || sd.temperature == 0 || sd.co2 == 0
 }

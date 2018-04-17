@@ -6,30 +6,30 @@ import (
 	"strconv"
 )
 
-func ParseData(data string) (rd RadioData) {
+func ParseData(data string) (rd radioData) {
 	json.Unmarshal([]byte(data), &rd)
 	return
 }
 
-func (v Vector3) String() string {
-	return fmt.Sprintf("%d %d %d", v.X, v.Y, v.Z)
+func (v vector3) String() string {
+	return fmt.Sprintf("%d %d %d", v.x, v.y, v.z)
 }
 
-func (sd SensorData) GetSensorType() (st SensorType, oerr error) {
+func (sd sensorData) GetSensorType() (st sensorType, oerr error) {
 	val, err := strconv.ParseInt(sd.SensorType, 16, 64)
 
-	if err != nil || val < 0 || val >= int64(ST_MAX_MARKER) {
+	if err != nil || val < 0 || val >= int64(stMAXMARKER) {
 		val = -1
 	}
 
-	st = SensorType(val)
+	st = sensorType(val)
 	oerr = err
 
 	return
 }
 
-func (rd RadioData) GetSensorData() (sd SensorDataCombined) {
-	var sensor SensorData
+func (rd radioData) GetSensorData() (sd sensorDataCombined) {
+	var sensor sensorData
 
 	humidityCount := 0
 	pressureCount := 0
@@ -45,73 +45,73 @@ func (rd RadioData) GetSensorData() (sd SensorDataCombined) {
 		}
 
 		switch sensorType {
-		case ST_APDS9200:
-			sd.Light = sensor.Light
-			sd.Uv = sensor.Uv
+		case stAPDS9200:
+			sd.light = sensor.Light
+			sd.uv = sensor.Uv
 
-		case ST_BME280:
-			sd.Humidity += sensor.Humidity2
-			sd.Pressure += sensor.Pressure2
-			sd.Temperature += sensor.Temp3
+		case stBME280:
+			sd.humidity += sensor.Humidity2
+			sd.pressure += sensor.Pressure2
+			sd.temperature += sensor.Temp3
 			humidityCount++
 			pressureCount++
 			tempCount++
 
-		case ST_BME680:
-			sd.Humidity += sensor.Humidity1
-			sd.Pressure += sensor.Pressure1
-			sd.Temperature += sensor.Temp2
+		case stBME680:
+			sd.humidity += sensor.Humidity1
+			sd.pressure += sensor.Pressure1
+			sd.temperature += sensor.Temp2
 			humidityCount++
 			pressureCount++
 			tempCount++
 
-		case ST_CCS811:
-			sd.Co2 = sensor.Co2
-			sd.Tvoc = sensor.Tvoc
+		case stCCS811:
+			sd.co2 = sensor.Co2
+			sd.tvoc = sensor.Tvoc
 
-		case ST_LSM9DS1TR_ACC:
-			sd.Acc.X = sensor.AccX
-			sd.Acc.Y = sensor.AccY
-			sd.Acc.Z = sensor.AccZ
+		case stLSM9DS1TRACC:
+			sd.acc.x = sensor.AccX
+			sd.acc.y = sensor.AccY
+			sd.acc.z = sensor.AccZ
 
-		case ST_LSM9DS1TR_GYRO:
-			sd.Gyro.X = sensor.GyroX
-			sd.Gyro.Y = sensor.GyroY
-			sd.Gyro.Z = sensor.GyroZ
+		case stLSM9DS1TRGYRO:
+			sd.gyro.x = sensor.GyroX
+			sd.gyro.y = sensor.GyroY
+			sd.gyro.z = sensor.GyroZ
 
-		case ST_LSM9DS1TR_MAG:
-			sd.Mag.X = sensor.MagX
-			sd.Mag.Y = sensor.MagY
-			sd.Mag.Z = sensor.MagZ
+		case stLSM9DS1TRMAG:
+			sd.mag.x = sensor.MagX
+			sd.mag.y = sensor.MagY
+			sd.mag.z = sensor.MagZ
 
-		case ST_PORTINPUT:
-			sd.PortInput = sensor.PortInput
+		case stPORTINPUT:
+			sd.portInput = sensor.PortInput
 
-		case ST_SOUNDPRESSURE:
-			sd.SoundPressure = sensor.SoundPressure
+		case stSOUNDPRESSURE:
+			sd.soundPressure = sensor.SoundPressure
 
-		case ST_STS31_TEMP:
-			sd.Temperature = sensor.Temp1
+		case stSTS31TEMP:
+			sd.temperature = sensor.Temp1
 			tempCount++
 
-		case ST_VBAT:
-			sd.VBat = sensor.VBat
+		case stVBAT:
+			sd.vBat = sensor.VBat
 
-		case ST_VCC:
-			sd.Vcc = sensor.Vcc
+		case stVCC:
+			sd.vcc = sensor.Vcc
 		}
 	}
 
 	if humidityCount > 1 {
-		sd.Humidity = int(Round(float64(sd.Humidity) / float64(humidityCount)))
+		sd.humidity = int(round(float64(sd.humidity) / float64(humidityCount)))
 	}
 
 	if pressureCount > 1 {
-		sd.Pressure = int(Round(float64(sd.Pressure) / float64(pressureCount)))
+		sd.pressure = int(round(float64(sd.pressure) / float64(pressureCount)))
 	}
 
 	if tempCount > 1 {
-		sd.Temperature = int(Round(float64(sd.Temperature) / float64(tempCount)))
+		sd.temperature = int(round(float64(sd.temperature) / float64(tempCount)))
 	}
 
 	return

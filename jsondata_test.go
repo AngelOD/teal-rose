@@ -5,35 +5,35 @@ import "testing"
 func TestGetSensorTypeToReturnCorrectType(t *testing.T) {
 	tables := []struct {
 		input  string
-		output SensorType
+		output sensorType
 	}{
-		{"00", ST_VBAT},
-		{"01", ST_VCC},
-		{"02", ST_STS31_TEMP},
-		{"03", ST_BME680},
-		{"04", ST_BME280},
-		{"05", ST_CCS811},
-		{"06", ST_APDS9200},
-		{"07", ST_SOUNDPRESSURE},
-		{"08", ST_PORTINPUT},
-		{"09", ST_LSM9DS1TR_MAG},
-		{"0A", ST_LSM9DS1TR_ACC},
-		{"0B", ST_LSM9DS1TR_GYRO},
-		{"0", ST_VBAT},
-		{"1", ST_VCC},
-		{"2", ST_STS31_TEMP},
-		{"3", ST_BME680},
-		{"4", ST_BME280},
-		{"5", ST_CCS811},
-		{"6", ST_APDS9200},
-		{"7", ST_SOUNDPRESSURE},
-		{"8", ST_PORTINPUT},
-		{"9", ST_LSM9DS1TR_MAG},
-		{"A", ST_LSM9DS1TR_ACC},
-		{"B", ST_LSM9DS1TR_GYRO},
+		{"00", stVBAT},
+		{"01", stVCC},
+		{"02", stSTS31TEMP},
+		{"03", stBME680},
+		{"04", stBME280},
+		{"05", stCCS811},
+		{"06", stAPDS9200},
+		{"07", stSOUNDPRESSURE},
+		{"08", stPORTINPUT},
+		{"09", stLSM9DS1TRMAG},
+		{"0A", stLSM9DS1TRACC},
+		{"0B", stLSM9DS1TRGYRO},
+		{"0", stVBAT},
+		{"1", stVCC},
+		{"2", stSTS31TEMP},
+		{"3", stBME680},
+		{"4", stBME280},
+		{"5", stCCS811},
+		{"6", stAPDS9200},
+		{"7", stSOUNDPRESSURE},
+		{"8", stPORTINPUT},
+		{"9", stLSM9DS1TRMAG},
+		{"A", stLSM9DS1TRACC},
+		{"B", stLSM9DS1TRGYRO},
 	}
 
-	var sd SensorData
+	var sd sensorData
 
 	for _, table := range tables {
 		sd.SensorType = table.input
@@ -53,7 +53,7 @@ func TestGetSensorTypeToReturnMinusOneIfNotFound(t *testing.T) {
 		"-01", "-1", "0C", "C", "0D", "D", "FF", "0100", "100",
 	}
 
-	var sd SensorData
+	var sd sensorData
 
 	for _, testCase := range testCases {
 		sd.SensorType = testCase
@@ -62,7 +62,7 @@ func TestGetSensorTypeToReturnMinusOneIfNotFound(t *testing.T) {
 
 		if err != nil {
 			t.Errorf("Got error while converting: %s", err)
-		} else if st != SensorType(-1) {
+		} else if st != sensorType(-1) {
 			t.Errorf("Returned type was incorrect. Got %d, wanted %d.", st, -1)
 		}
 	}

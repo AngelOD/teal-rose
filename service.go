@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/kardianos/service"
 	"log"
 	"os"
 	"time"
+
+	"github.com/kardianos/service"
 )
 
 func (p *program) Start(s service.Service) error {
@@ -41,7 +42,7 @@ func (p *program) run() {
 		logger.Info("Outputting log to standard out.")
 	}
 
-	SocketServer(port, p)
+	socketServer(port, p)
 }
 
 func (p *program) Stop(s service.Service) error {

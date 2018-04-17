@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func SocketServer(port int, prg *program) {
+func socketServer(port int, prg *program) {
 	listen, err := net.Listen("tcp4", ":"+strconv.Itoa(port))
 
 	if err != nil {

@@ -4,27 +4,27 @@ import (
 	"github.com/kardianos/service"
 )
 
-const RFC3339Micro = "2006-01-02T15:04:05.000000Z07:00"
-const MdnsServiceType = "lora_server"
+const rfc3339Micro = "2006-01-02T15:04:05.000000Z07:00"
+const mdnsServiceType = "lora_server"
 
 const (
-	ST_VBAT SensorType = iota
-	ST_VCC
-	ST_STS31_TEMP
-	ST_BME680
-	ST_BME280
-	ST_CCS811
-	ST_APDS9200
-	ST_SOUNDPRESSURE
-	ST_PORTINPUT
-	ST_LSM9DS1TR_MAG
-	ST_LSM9DS1TR_ACC
-	ST_LSM9DS1TR_GYRO
-	ST_MAX_MARKER
+	stVBAT sensorType = iota
+	stVCC
+	stSTS31TEMP
+	stBME680
+	stBME280
+	stCCS811
+	stAPDS9200
+	stSOUNDPRESSURE
+	stPORTINPUT
+	stLSM9DS1TRMAG
+	stLSM9DS1TRACC
+	stLSM9DS1TRGYRO
+	stMAXMARKER
 )
 
 var (
-	dbData   = map[string]string{
+	dbData = map[string]string{
 		"DB_NAME": "teal_rose",
 		"DB_USER": "teal_rose",
 		"DB_PASS": "",
@@ -34,7 +34,7 @@ var (
 	host     = ""
 	port     = 3333
 	saveData = false
-	rdStore  = make(chan RadioData, 20)
+	rdStore  = make(chan radioData, 20)
 )
 
 var (
@@ -44,8 +44,8 @@ var (
 	prg    *program
 )
 
-type Config struct {
-	Name, DisplayName, Description string
+type config struct {
+	name, displayName, description string
 }
 
 type program struct {
@@ -53,13 +53,13 @@ type program struct {
 	service service.Service
 }
 
-//go:generate stringer -type=SensorType
-type SensorType int
+//go:generate stringer -type=sensorType
+type sensorType int
 
-type SensorData struct {
+type sensorData struct {
 	SensorType string `json:"SensorType"`
-	//SensorIndex   string `json:"SensorIndex"`
-	//Length        string `json:"Length"`
+	//sensorIndex   string `json:"SensorIndex"`
+	//length        string `json:"Length"`
 	VBat          int `json:"VBat"`
 	Vcc           int `json:"VCC"`
 	Temp1         int `json:"Temp_STS31"`
@@ -86,31 +86,31 @@ type SensorData struct {
 	GyroZ         int `json:"Gyro_Z"`
 }
 
-type Vector3 struct {
-	X int
-	Y int
-	Z int
+type vector3 struct {
+	x int
+	y int
+	z int
 }
 
-type SensorDataCombined struct {
-	VBat          int
-	Vcc           int
-	Temperature   int
-	Humidity      int
-	Pressure      int
-	Co2           int
-	Tvoc          int
-	Light         int
-	Uv            int
-	SoundPressure int
-	PortInput     int
-	Mag           Vector3
-	Acc           Vector3
-	Gyro          Vector3
+type sensorDataCombined struct {
+	vBat          int
+	vcc           int
+	temperature   int
+	humidity      int
+	pressure      int
+	co2           int
+	tvoc          int
+	light         int
+	uv            int
+	soundPressure int
+	portInput     int
+	mag           vector3
+	acc           vector3
+	gyro          vector3
 }
 
-type RadioData struct {
-	RadioBusId int `json:"radiobusid"`
+type radioData struct {
+	RadioBusID int `json:"radiobusid"`
 	Channel    int `json:"channel"`
 	//SpreadingFactor int          `json:"spreadingfactor"`
 	//Rssi            int          `json:"RSSI"`
@@ -123,5 +123,5 @@ type RadioData struct {
 	//CombinedRssiSnr float64      `json:"combined_rssi_snr"`
 	//Timestamp   string       `json:"TimeStamp"`
 	TimestampTz string       `json:"TimeStampTZ"`
-	Sensors     []SensorData `json:"Sensors"`
+	Sensors     []sensorData `json:"Sensors"`
 }

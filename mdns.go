@@ -4,7 +4,7 @@ import "github.com/hashicorp/mdns"
 
 func setupMdns() {
 	info := []string{"Test service"}
-	service, err := mdns.NewMDNSService(MdnsServiceType + "_" + domain, MdnsServiceType, domain, host, port, nil, info)
+	service, err := mdns.NewMDNSService(mdnsServiceType+"_"+domain, mdnsServiceType, domain, host, port, nil, info)
 
 	if err != nil {
 		logger.Errorf("Unable to create mDNS service: %v", err)
