@@ -38,10 +38,11 @@ var (
 )
 
 var (
-	env    map[string]string
-	logger service.Logger
-	svc    service.Service
-	prg    *program
+	env         map[string]string
+	logger      service.Logger
+	svc         service.Service
+	prg         *program
+	versionInfo string // Set during build phase
 )
 
 type config struct {

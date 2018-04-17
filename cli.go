@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/alexsasharegan/dotenv"
+	"github.com/blang/semver"
 	"github.com/kardianos/osext"
 	"github.com/kardianos/service"
 	"github.com/teris-io/cli"
@@ -30,9 +31,14 @@ func setupCli() cli.App {
 		WithOption(optStoreData).
 		WithAction(handleCli)
 
+	cmdVersion := cli.NewCommand("version", "Version info").
+		WithShortcut("ver").
+		WithAction(handleVersionCli)
+
 	app := cli.New("SW802F18 Test Server").
 		WithCommand(cmdService).
-		WithCommand(cmdRun)
+		WithCommand(cmdRun).
+		WithCommand(cmdVersion)
 
 	return app
 }
@@ -120,6 +126,18 @@ func handleServerCli(args []string, options map[string]string) int {
 		logger.Infof("Valid actions: %q\n", service.ControlAction)
 		logger.Error(err)
 	}
+
+	return 0
+}
+
+func handleVersionCli(args []string, options map[string]string) int {
+	vers, err := semver.ParseTolerant(versionInfo)
+	if err != nil {
+		logger.Errorf("Unable to parse version info: %v", err)
+		return 1
+	}
+
+	logger.Infof("Version: v%d.%d.%d", vers.Major, vers.Minor, vers.Patch)
 
 	return 0
 }

@@ -13,6 +13,8 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
+var flags string = ""
+
 // for the current OS and architecture
 func Build() {
 	mg.Deps(doGenerate)
@@ -70,7 +72,15 @@ func BuildWindows32() {
 func Test() {
 	fmt.Println("Running tests...")
 
-	sh.RunV("go", "test", "-v")
+	cPath := filepath.Join(getOutputPath(), "cover.out")
+	oPath := filepath.Join(getOutputPath(), "coverage.html")
+
+	sh.RunV("go", "test", "-v", "-coverprofile="+cPath)
+	sh.RunV("go", "tool", "cover", "-html="+cPath, "-o", oPath)
+	sh.RunV("go", "tool", "cover", "-func="+cPath)
+	sh.RunV("rm", cPath)
+
+	fmt.Printf("Detailed coverage data available in %s\n", oPath)
 }
 
 // runs go clean
@@ -90,14 +100,26 @@ func doBuild(pOs string, pArch string) {
 
 	fmt.Printf("Outputting to: %s\n", path)
 
+	setFlags()
+
 	os.Setenv("GOOS", pOs)
 	os.Setenv("GOARCH", pArch)
 
-	sh.RunV("go", "build", "-o", path)
+	sh.RunV("go", "build", "-o", path, "-ldflags="+flags, "github.com/angelod/teal-rose")
 }
 
 func doGenerate() {
 	sh.RunV("go", "generate")
+}
+
+func setFlags() {
+	tag := getTag()
+
+	if tag == "" {
+		tag = "v0.0.1-dev"
+	}
+
+	flags = fmt.Sprintf(`-X "main.versionInfo=%s"`, tag)
 }
 
 func getOutputPath() string {
@@ -113,4 +135,9 @@ func getOutputPath() string {
 	}
 
 	return path
+}
+
+func getTag() string {
+	tag, _ := sh.Output("git", "describe", "--tags")
+	return tag
 }

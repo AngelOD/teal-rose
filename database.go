@@ -45,7 +45,7 @@ func storeDataRunner() {
 		case rd = <-rdStore:
 			logger.Info("Data found!")
 
-			sd = rd.GetSensorData()
+			sd = rd.getSensorData()
 
 			if shouldDiscardData(&sd) {
 				logger.Warning("Invalid data. Ignoring row.")
@@ -63,8 +63,8 @@ func storeDataRunner() {
 				rd.RadioBusID, rd.Channel, rd.NodeMacAddress, rd.PacketType, rd.SequenceNumber,
 				t.UnixNano(), rd.TimestampTz, sd.vBat, sd.vcc, sd.temperature,
 				sd.humidity, sd.pressure, sd.co2, sd.tvoc, sd.light,
-				sd.uv, sd.soundPressure, sd.portInput, sd.mag.String(), sd.acc.String(),
-				sd.gyro.String(),
+				sd.uv, sd.soundPressure, sd.portInput, sd.mag.string(), sd.acc.string(),
+				sd.gyro.string(),
 			)
 
 			if err != nil {

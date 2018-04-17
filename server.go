@@ -72,7 +72,7 @@ ILOOP:
 		case nil:
 			sb.WriteString(data)
 			if isTransportOver(data) {
-				rd := ParseData(sb.String())
+				rd := parseData(sb.String())
 
 				if debugLog {
 					log.Printf("Received: %+v\n", sb.String())

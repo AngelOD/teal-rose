@@ -6,16 +6,16 @@ import (
 	"strconv"
 )
 
-func ParseData(data string) (rd radioData) {
+func parseData(data string) (rd radioData) {
 	json.Unmarshal([]byte(data), &rd)
 	return
 }
 
-func (v vector3) String() string {
+func (v vector3) string() string {
 	return fmt.Sprintf("%d %d %d", v.x, v.y, v.z)
 }
 
-func (sd sensorData) GetSensorType() (st sensorType, oerr error) {
+func (sd sensorData) getSensorType() (st sensorType, oerr error) {
 	val, err := strconv.ParseInt(sd.SensorType, 16, 64)
 
 	if err != nil || val < 0 || val >= int64(stMAXMARKER) {
@@ -28,7 +28,7 @@ func (sd sensorData) GetSensorType() (st sensorType, oerr error) {
 	return
 }
 
-func (rd radioData) GetSensorData() (sd sensorDataCombined) {
+func (rd radioData) getSensorData() (sd sensorDataCombined) {
 	var sensor sensorData
 
 	humidityCount := 0
@@ -38,7 +38,7 @@ func (rd radioData) GetSensorData() (sd sensorDataCombined) {
 
 	for i := 0; i < sensorCount; i++ {
 		sensor = rd.Sensors[i]
-		sensorType, err := sensor.GetSensorType()
+		sensorType, err := sensor.getSensorType()
 
 		if err != nil {
 			continue

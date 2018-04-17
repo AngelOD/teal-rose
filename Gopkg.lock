@@ -8,6 +8,12 @@
   revision = "090a4d1b5d42ce7c3577c42f282b55fc45d5eab1"
 
 [[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   revision = "a0583e0143b1624142adab07e0e97fe106d99561"
@@ -99,6 +105,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e8347e6f37bd8949fc4263ba4755e4a61b3f72b3aa961593878ee38009a8c200"
+  inputs-digest = "493c174d3d430c52d088639c9c790990fa937d531aeb274870715e20900cd8e2"
   solver-name = "gps-cdcl"
   solver-version = 1
