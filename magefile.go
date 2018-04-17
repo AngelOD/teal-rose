@@ -17,14 +17,7 @@ import (
 func Build() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild(runtime.GOOS, runtime.GOARCH, false)
-}
-
-// for debugging on the current OS and architecture
-func BuildDebug() {
-	mg.Deps(doGenerate)
-	mg.Deps(Test)
-	doBuild(runtime.GOOS, runtime.GOARCH, true)
+	doBuild(runtime.GOOS, runtime.GOARCH)
 }
 
 // for all supported operating systems and architectures
@@ -49,28 +42,28 @@ func BuildAll32() {
 func BuildLinux() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("linux", "amd64", false)
+	doBuild("linux", "amd64")
 }
 
 // for the 386 architecture on Linux
 func BuildLinux32() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("linux", "386", false)
+	doBuild("linux", "386")
 }
 
 // for the amd64 architecture on Windows
 func BuildWindows() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("windows", "amd64", false)
+	doBuild("windows", "amd64")
 }
 
 // for the 386 architecture on Windows
 func BuildWindows32() {
 	mg.Deps(doGenerate)
 	mg.Deps(Test)
-	doBuild("windows", "386", false)
+	doBuild("windows", "386")
 }
 
 // runs all tests
@@ -80,7 +73,14 @@ func Test() {
 	sh.RunV("go", "test", "-v")
 }
 
-func doBuild(pOs string, pArch string, pDebugBuild bool) {
+// runs go clean
+func Clean() {
+	fmt.Println("Cleaning")
+
+	sh.RunV("go", "clean")
+}
+
+func doBuild(pOs string, pArch string) {
 	fmt.Printf("Building for %s (%s)\n", pOs, pArch)
 
 	path := filepath.Join(getOutputPath(), fmt.Sprintf("%s_%s", pOs, pArch))
@@ -93,13 +93,7 @@ func doBuild(pOs string, pArch string, pDebugBuild bool) {
 	os.Setenv("GOOS", pOs)
 	os.Setenv("GOARCH", pArch)
 
-	debugFlags := ""
-	if !pDebugBuild {
-		fmt.Println("Stripping debug info from executable")
-		debugFlags = "-ldflags=-s -w"
-	}
-
-	sh.RunV("go", "build", "-o", path, debugFlags)
+	sh.RunV("go", "build", "-o", path)
 }
 
 func doGenerate() {
