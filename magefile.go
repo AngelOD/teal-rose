@@ -75,7 +75,7 @@ func Test() {
 	cPath := filepath.Join(getOutputPath(), "cover.out")
 	oPath := filepath.Join(getOutputPath(), "coverage.html")
 
-	sh.RunV("go", "test", "-v", "-coverprofile="+cPath)
+	sh.RunV("go", "test", "-bench", ".", "-v", "-coverprofile="+cPath)
 	sh.RunV("go", "tool", "cover", "-html="+cPath, "-o", oPath)
 	sh.RunV("go", "tool", "cover", "-func="+cPath)
 	sh.RunV("rm", cPath)

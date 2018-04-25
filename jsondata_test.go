@@ -157,3 +157,13 @@ func TestParseDataToReturnCorrectlyParsedRadioData(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkParseData(b *testing.B) {
+	testData := `{"payloadlength": 53, "combined_rssi_snr": -110.5, "sequencenumber": 1413, "TimeStamp": "2018-04-17 15:05:32.330502", "node_mac_address": "000000F2", "TimeStampTZ": "2018-04-17T15:05:32.330657+02:00", "radiobusid": 1, "SNR": 6, "RSSI": 45, "spreadingfactor": 8, "Sensors": [{"SensorType": "00", "Length": "02", "VBat": 445, "SensorIndex": "00"}, {"SensorType": "01", "Length": "02", "VCC": 287, "SensorIndex": "00"}, {"SensorType": "02", "Temp_STS31": 2400, "Length": "02", "SensorIndex": "00"}, {"Humidity_BME280": 26064, "SensorType": "04", "Length": "0C", "Pressure_BME280": 102171, "Temp_BME280": 2375, "SensorIndex": "00"}, {"SensorType": "05", "Length": "04", "CO2": 473, "TVOC": 11, "SensorIndex": "00"}, {"SensorType": "06", "Light": 16, "Length": "08", "UV": 0, "SensorIndex": "00"}, {"SensorType": "07", "Soundpressure": 6, "Length": "02", "SensorIndex": "00"}], "packet_type": 1, "payload": "00000201BD010002011F020002096004000C00000947000065D000018F1B05000401D9000B06000800000010000000000700020006", "channel": 0}`
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		parseData(testData)
+	}
+}
