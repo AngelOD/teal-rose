@@ -5,7 +5,7 @@ import (
 )
 
 const rfc3339Micro = "2006-01-02T15:04:05.000000Z07:00"
-const mdnsServiceType = "lora_server"
+const mdnsServiceType = "_lora_server._tcp"
 
 const (
 	stVBAT sensorType = iota

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"strconv"
 
@@ -50,6 +51,8 @@ func handleCommonCli(args []string, options map[string]string) int {
 
 	if pDomain, prs := options["domain"]; prs {
 		domain = pDomain
+	} else {
+		domain, _ = os.Hostname()
 	}
 
 	if pHost, prs := options["host"]; prs {

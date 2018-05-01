@@ -15,6 +15,8 @@ func (p *program) Start(s service.Service) error {
 		logger.Info("Running under service manager")
 	}
 
+	setupMdns()
+
 	p.exit = make(chan struct{})
 	go p.run()
 
@@ -56,7 +58,7 @@ func initService() {
 		Name:        "Sw802f18Receiver",
 		DisplayName: "SW802F18 Sensor Data Receiver",
 		Description: "Listens on a specific port and receives data from sensor clusters.",
-		Arguments:   []string{"run", "-s", "-d"},
+		Arguments:   []string{"run", "-s"},
 	}
 
 	prg = &program{}
