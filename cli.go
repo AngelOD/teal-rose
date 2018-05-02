@@ -165,6 +165,24 @@ func loadDotEnv() bool {
 		}
 	}
 
+	if webDomainVal, prs := env["WEB_DOMAIN"]; prs {
+		webDomain = webDomainVal
+	}
+
+	if webHostVal, prs := env["WEB_HOST"]; prs {
+		webHost = webHostVal
+	}
+
+	if webIPVal, prs := env["WEB_IP"]; prs {
+		webIP = webIPVal
+	}
+
+	if webPortVal, prs := env["WEB_PORT"]; prs {
+		if pWebPortVal, err := strconv.Atoi(webPortVal); err == nil {
+			webPort = pWebPortVal
+		}
+	}
+
 	return true
 }
 

@@ -29,12 +29,16 @@ var (
 		"DB_USER": "teal_rose",
 		"DB_PASS": "",
 	}
-	debugLog = false
-	domain   = ""
-	host     = ""
-	port     = 3333
-	saveData = false
-	rdStore  = make(chan radioData, 20)
+	debugLog  = false
+	domain    = ""
+	host      = ""
+	port      = 3333
+	rdStore   = make(chan radioData, 20)
+	saveData  = false
+	webDomain = ""
+	webHost   = ""
+	webIP     = ""
+	webPort   = 80
 )
 
 var (

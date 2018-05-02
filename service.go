@@ -15,10 +15,9 @@ func (p *program) Start(s service.Service) error {
 		logger.Info("Running under service manager")
 	}
 
-	setupMdns()
-
 	p.exit = make(chan struct{})
 	go p.run()
+	go setupMdns()
 
 	return nil
 }
