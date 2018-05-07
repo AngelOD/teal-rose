@@ -19,10 +19,8 @@ func setupCli() cli.App {
 	optPort := cli.NewOption("port", "Port to host on").WithType(cli.TypeInt)
 	optStoreData := cli.NewOption("save", "Store information in DB").WithChar('s').WithType(cli.TypeBool)
 
-	cmdService := cli.NewCommand("service", "Manage service").
-		WithShortcut("srv").
-		WithArg(cli.NewArg("command", "The service subcommand")).
-		WithAction(handleServerCli)
+	cmdFix := cli.NewCommand("fix", "Clean data of dual results").
+		WithAction(handleFixCli)
 
 	cmdRun := cli.NewCommand("run", "Normal run").
 		WithOption(optDebug).
@@ -32,11 +30,17 @@ func setupCli() cli.App {
 		WithOption(optStoreData).
 		WithAction(handleCli)
 
+	cmdService := cli.NewCommand("service", "Manage service").
+		WithShortcut("srv").
+		WithArg(cli.NewArg("command", "The service subcommand")).
+		WithAction(handleServerCli)
+
 	cmdVersion := cli.NewCommand("version", "Version info").
 		WithShortcut("ver").
 		WithAction(handleVersionCli)
 
 	app := cli.New("SW802F18 Test Server").
+		WithCommand(cmdFix).
 		WithCommand(cmdService).
 		WithCommand(cmdRun).
 		WithCommand(cmdVersion)
@@ -44,7 +48,7 @@ func setupCli() cli.App {
 	return app
 }
 
-func handleCommonCli(args []string, options map[string]string) int {
+func parseCommonCli(args []string, options map[string]string) int {
 	if pDebug, err := strconv.ParseBool(options["debug"]); err == nil && pDebug {
 		debugLog = true
 	}
@@ -66,30 +70,36 @@ func handleCommonCli(args []string, options map[string]string) int {
 	return 0
 }
 
+func parseDbCli(args []string, options map[string]string) int {
+	keys := []string{"DB_NAME", "DB_USER", "DB_PASS"}
+	saveData = true
+
+	for i := 0; i < len(keys); i++ {
+		if val, prs := env[keys[i]]; prs && len(val) > 0 {
+			dbData[keys[i]] = val
+		} else {
+			if len(dbData[keys[i]]) == 0 {
+				logger.Errorf("Variable %s required but missing from .env file!", keys[i])
+				return 2
+			}
+		}
+	}
+
+	return 0
+}
+
 func handleCli(args []string, options map[string]string) int {
 	if !loadDotEnv() {
 		return 2
 	}
 
-	common := handleCommonCli(args, options)
-
-	if common > 0 {
+	if common := parseCommonCli(args, options); common > 0 {
 		return common
 	}
 
 	if pSave, err := strconv.ParseBool(options["save"]); err == nil && pSave {
-		keys := []string{"DB_NAME", "DB_USER", "DB_PASS"}
-		saveData = true
-
-		for i := 0; i < len(keys); i++ {
-			if val, prs := env[keys[i]]; prs && len(val) > 0 {
-				dbData[keys[i]] = val
-			} else {
-				if len(dbData[keys[i]]) == 0 {
-					logger.Errorf("Variable %s required but missing from .env file!", keys[i])
-					return 2
-				}
-			}
+		if dbRes := parseDbCli(args, options); dbRes > 0 {
+			return dbRes
 		}
 	}
 
@@ -116,6 +126,26 @@ func handleCli(args []string, options map[string]string) int {
 
 	if err != nil {
 		logger.Error(err)
+		return 2
+	}
+
+	return 0
+}
+
+func handleFixCli(args []string, options map[string]string) int {
+	if !loadDotEnv() {
+		return 2
+	}
+
+	if common := parseCommonCli(args, options); common > 0 {
+		return common
+	}
+
+	if dbRes := parseDbCli(args, options); dbRes > 0 {
+		return dbRes
+	}
+
+	if err := fixDatabaseEntries(); err != nil {
 		return 2
 	}
 

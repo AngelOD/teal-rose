@@ -23,13 +23,14 @@ func storeDataRunner() {
 	}
 	defer db.Close()
 
-	stmtInsert, err := db.Prepare("INSERT INTO radio_datas (" +
-		"`radio_bus_id`, `channel`, `node_mac_address`, `packet_type`, `sequence_number`," +
-		"`timestamp_nano`, `timestamp_tz`, `v_bat`, `vcc`, `temperature`," +
-		"`humidity`, `pressure`, `co2`, `tvoc`, `light`," +
-		"`uv`, `sound_pressure`, `port_input`, `mag`, `acc`," +
-		"`gyro`) VALUES (" +
-		"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmtInsert, err := db.Prepare(
+		"INSERT INTO radio_datas (" +
+			"`radio_bus_id`, `channel`, `node_mac_address`, `packet_type`, `sequence_number`," +
+			"`timestamp_nano`, `timestamp_tz`, `v_bat`, `vcc`, `temperature`," +
+			"`humidity`, `pressure`, `co2`, `tvoc`, `light`," +
+			"`uv`, `sound_pressure`, `port_input`, `mag`, `acc`," +
+			"`gyro`) VALUES (" +
+			"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	defer stmtInsert.Close()
 
 	if err != nil {
@@ -81,8 +82,67 @@ func storeDataRunner() {
 }
 
 func ensureDataTable() bool {
-	// TODO Complete this
+	// TODO: Complete this
 	return true
+}
+
+func fixDatabaseEntries() error {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", dbData["DB_USER"], dbData["DB_PASS"], dbData["DB_NAME"]))
+
+	if err != nil {
+		logger.Errorf("Error connecting to DB: %s", err)
+		// TODO: Figure out a good way to exit here
+		return err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(
+		"SELECT `node_mac_address`, `sequence_number`, COUNT(*) AS entry_count " +
+			"FROM radio_datas " +
+			"GROUP BY `node_mac_address`, `sequence_number`")
+
+	if err != nil {
+		logger.Errorf("Error querying DB: %s", err)
+		return err
+	}
+	defer rows.Close()
+
+	var (
+		resultCountOne    int
+		resultCountTwo    int
+		rowsEliminatedOne int
+		rowsEliminatedTwo int
+	)
+
+	for rows.Next() {
+		var (
+			nodeMacAddress string
+			sequenceNumber int64
+			entryCount     int
+		)
+
+		if err := rows.Scan(&nodeMacAddress, &sequenceNumber, &entryCount); err != nil {
+			logger.Errorf("Error reading row data: %s", err)
+			return err
+		}
+
+		if entryCount == 1 {
+			resultCountOne++
+			rowsEliminatedOne++
+		}
+
+		if entryCount > 1 {
+			resultCountTwo++
+			rowsEliminatedTwo += entryCount - 1
+		}
+	}
+
+	logger.Infof("Found %d entries with duplicates.", resultCountTwo)
+	logger.Infof("Eliminating duplicates would remove %d rows.", rowsEliminatedTwo)
+	logger.Infof("Found %d entries without duplicates.", resultCountOne)
+	logger.Infof("Eliminating these plus duplicates would save %d rows.", rowsEliminatedOne+rowsEliminatedTwo)
+
+	return nil
 }
 
 func shouldDiscardData(sd *sensorDataCombined) bool {
