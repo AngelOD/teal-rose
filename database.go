@@ -39,7 +39,19 @@ func storeDataRunner() {
 		return
 	}
 
-	logger.Infof("Statement prepared. Listening to save requests...\n")
+	stmtSelect, err := db.Prepare(
+		"SELECT `co2`, `humidity`, `light`, `pressure`, `sound_pressure`, `temperature`, `tvoc`, `uv` " +
+			"FROM radio_datas " +
+			"WHERE `node_mac_address` = ? AND `sequence_number` = ?")
+	defer stmtSelect.Close()
+
+	if err != nil {
+		logger.Errorf("Error preparing statement: %s", err)
+		// TODO: Figure out a good way to exit here
+		return
+	}
+
+	logger.Infof("Statements prepared. Listening for save requests...\n")
 
 	for {
 		select {
@@ -58,6 +70,41 @@ func storeDataRunner() {
 				logger.Warningf("Unable to convert time string: %s", rd.TimestampTz)
 				logger.Warningf("Because of: %s", err)
 				continue
+			}
+
+			rows, err := stmtSelect.Query(rd.NodeMacAddress, rd.SequenceNumber)
+
+			if err != nil {
+				logger.Errorf("Error querying data: %s", err)
+			} else if rows.Next() {
+				var (
+					tCo2           int
+					tHumidity      int
+					tLight         int
+					tPressure      int
+					tSoundPressure int
+					tTemperature   int
+					tTvoc          int
+					tUv            int
+				)
+
+				if err := rows.Scan(&tCo2, &tHumidity, &tLight, &tPressure, &tSoundPressure, &tTemperature, &tTvoc, &tUv); err != nil {
+					logger.Errorf("Error parsing data: %s", err)
+				} else if tCo2 == sd.co2 && tHumidity == sd.humidity && tLight == sd.light && tPressure == sd.pressure &&
+					tSoundPressure == sd.soundPressure && tTemperature == sd.temperature && tTvoc == sd.tvoc && tUv == sd.uv {
+					//
+					logger.Info("Multiple entries detected. Doing nothing for now.")
+				} else {
+					logger.Info("Row with different data detected! [%s] (%d)", rd.NodeMacAddress, rd.SequenceNumber)
+					logger.Infof("  [co2] %d vs %d", tCo2, sd.co2)
+					logger.Infof("  [humidity] %d vs %d", tHumidity, sd.humidity)
+					logger.Infof("  [light] %d vs %d", tLight, sd.light)
+					logger.Infof("  [pressure] %d vs %d", tPressure, sd.pressure)
+					logger.Infof("  [noise] %d vs %d", tSoundPressure, sd.soundPressure)
+					logger.Infof("  [temperature] %d vs %d", tTemperature, sd.temperature)
+					logger.Infof("  [voc] %d vs %d", tTvoc, sd.tvoc)
+					logger.Infof("  [uv] %d vs %d", tUv, sd.uv)
+				}
 			}
 
 			_, err = stmtInsert.Exec(
