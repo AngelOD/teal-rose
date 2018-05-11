@@ -35,6 +35,9 @@ func setupCli() cli.App {
 		WithArg(cli.NewArg("command", "The service subcommand")).
 		WithAction(handleServerCli)
 
+	cmdTestInflux := cli.NewCommand("tin", "Test InfluxDB").
+		WithAction(handleTinCli)
+
 	cmdVersion := cli.NewCommand("version", "Version info").
 		WithShortcut("ver").
 		WithAction(handleVersionCli)
@@ -43,7 +46,8 @@ func setupCli() cli.App {
 		WithCommand(cmdFix).
 		WithCommand(cmdService).
 		WithCommand(cmdRun).
-		WithCommand(cmdVersion)
+		WithCommand(cmdVersion).
+		WithCommand(cmdTestInflux)
 
 	return app
 }
@@ -148,6 +152,12 @@ func handleFixCli(args []string, options map[string]string) int {
 	if err := fixDatabaseEntries(); err != nil {
 		return 2
 	}
+
+	return 0
+}
+
+func handleTinCli(args []string, options map[string]string) int {
+	runInfluxDbTest()
 
 	return 0
 }
