@@ -25,6 +25,9 @@ const (
 
 var (
 	dbData = map[string]string{
+		"DB_TYPE": "influxdb",
+		"DB_HOST": "localhost",
+		"DB_PORT": "8086",
 		"DB_NAME": "teal_rose",
 		"DB_USER": "teal_rose",
 		"DB_PASS": "",

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/alexsasharegan/dotenv"
 	"github.com/blang/semver"
@@ -16,6 +17,11 @@ func setupCli() cli.App {
 	optDebug := cli.NewOption("debug", "Log debug information").WithChar('d').WithType(cli.TypeBool)
 	optDomain := cli.NewOption("domain", "Domain name of service").WithChar('D').WithType(cli.TypeString)
 	optHost := cli.NewOption("host", "Host name of current host").WithChar('H').WithType(cli.TypeString)
+	optIDbHost := cli.NewOption("idbhost", "Influx DB host").WithType(cli.TypeString)
+	optIDbName := cli.NewOption("idbname", "Influx DB name").WithType(cli.TypeString)
+	optIDbPass := cli.NewOption("idbpass", "Influx DB pass").WithType(cli.TypeString)
+	optIDbUser := cli.NewOption("idbuser", "Influx DB user").WithType(cli.TypeString)
+	optMysqlConn := cli.NewOption("myconn", "MySQL connector string").WithType(cli.TypeString)
 	optPort := cli.NewOption("port", "Port to host on").WithType(cli.TypeInt)
 	optStoreData := cli.NewOption("save", "Store information in DB").WithChar('s').WithType(cli.TypeBool)
 
@@ -35,7 +41,12 @@ func setupCli() cli.App {
 		WithArg(cli.NewArg("command", "The service subcommand")).
 		WithAction(handleServerCli)
 
-	cmdTestInflux := cli.NewCommand("tin", "Test InfluxDB").
+	cmdTestInflux := cli.NewCommand("tin", "Migrate to InfluxDB").
+		WithOption(optIDbHost).
+		WithOption(optIDbName).
+		WithOption(optIDbUser).
+		WithOption(optIDbPass).
+		WithOption(optMysqlConn).
 		WithAction(handleTinCli)
 
 	cmdVersion := cli.NewCommand("version", "Version info").
@@ -75,7 +86,7 @@ func parseCommonCli(args []string, options map[string]string) int {
 }
 
 func parseDbCli(args []string, options map[string]string) int {
-	keys := []string{"DB_NAME", "DB_USER", "DB_PASS"}
+	keys := []string{"DB_TYPE", "DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASS"}
 	saveData = true
 
 	for i := 0; i < len(keys); i++ {
@@ -116,7 +127,11 @@ func handleCli(args []string, options map[string]string) int {
 	}
 
 	if saveData {
-		go storeDataRunner()
+		if strings.ToLower(dbData["DB_TYPE"]) == "influxdb" {
+			go influxStoreDataRunner()
+		} else {
+			go mysqlStoreDataRunner()
+		}
 
 		logger.Info("Will save incoming data to DB.")
 		logger.Infof("Name: %s\n", dbData["DB_NAME"])
@@ -157,7 +172,41 @@ func handleFixCli(args []string, options map[string]string) int {
 }
 
 func handleTinCli(args []string, options map[string]string) int {
-	runInfluxDbTest()
+	var (
+		influxDbHost   string
+		influxDbName   string
+		influxDbUser   string
+		influxDbPass   string
+		mysqlConnector string
+		prs            bool
+	)
+
+	if influxDbHost, prs = options["idbhost"]; !prs {
+		logger.Error("Missing option: Influx DB host")
+		return 2
+	}
+
+	if influxDbName, prs = options["idbname"]; !prs {
+		logger.Error("Missing option: Influx DB name")
+		return 2
+	}
+
+	if influxDbUser, prs = options["idbuser"]; !prs {
+		logger.Error("Missing option: Influx DB user")
+		return 2
+	}
+
+	if influxDbPass, prs = options["idbpass"]; !prs {
+		logger.Error("Missing option: Influx DB pass")
+		return 2
+	}
+
+	if mysqlConnector, prs = options["myconn"]; !prs {
+		logger.Error("Missing option: MySql DB connector string")
+		return 2
+	}
+
+	migrateMysqlToInflux(mysqlConnector, influxDbHost, influxDbName, influxDbUser, influxDbPass)
 
 	return 0
 }

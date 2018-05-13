@@ -5,16 +5,24 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
-func storeDataRunner() {
+func mysqlStoreDataRunner() {
 	var rd radioData
 	var sd sensorDataCombined
 
 	logger.Info("Starting data storage thread.")
 
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@/%s", dbData["DB_USER"], dbData["DB_PASS"], dbData["DB_NAME"]))
+	conf := mysql.Config{
+		User:   dbData["DB_USER"],
+		Passwd: dbData["DB_PASS"],
+		Net:    "tcp",
+		Addr:   fmt.Sprintf("%s:%s", dbData["DB_HOST"], dbData["DB_PORT"]),
+		DBName: dbData["DB_NAME"],
+	}
+
+	db, err := sql.Open("mysql", conf.FormatDSN())
 
 	if err != nil {
 		logger.Errorf("Error connecting to DB: %s", err)
