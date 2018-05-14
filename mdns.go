@@ -8,23 +8,27 @@ import (
 )
 
 func setupMdns() {
-	var ips []net.IP
-
-	if len(webIP) > 0 {
-		ips = append(ips, net.ParseIP(webIP))
-	} else {
-		ips = nil
-	}
+	var service *mdns.MDNSService
+	var err error
 
 	info := []string{"Test service"}
-	service, err := mdns.NewMDNSService(domain, mdnsServiceType, webDomain, webHost, webPort, ips, info)
+	if len(webIP) > 0 {
+		var ips []net.IP
 
-	logger.Infof("IPs: %+v", service.IPs)
+		ips = append(ips, net.ParseIP(webIP))
+		service, err = mdns.NewMDNSService(domain, mdnsServiceType, webDomain, webHost, webPort, ips, info)
+	} else {
+		service, err = mdns.NewMDNSService(domain, mdnsServiceType, webDomain, webHost, webPort, nil, info)
+		logger.Infof("Inside: %+v", service)
+	}
 
 	if err != nil {
 		logger.Errorf("Unable to create mDNS service: %v", err)
 		return
 	}
+
+	logger.Infof("Outside: %+v", service)
+	logger.Infof("IPs: %+v", service.IPs)
 
 	server, err := mdns.NewServer(&mdns.Config{Zone: service})
 	if err != nil {

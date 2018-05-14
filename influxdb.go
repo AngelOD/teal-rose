@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -12,8 +13,6 @@ import (
 )
 
 func migrateMysqlToInflux(mysqlConnector, influxHost, influxDbName, influxUser, influxPass string) {
-	logger.Info("Starting data storage thread.")
-
 	db, err := sql.Open("mysql", mysqlConnector)
 
 	if err != nil {
@@ -209,7 +208,8 @@ func migrateMysqlToInflux(mysqlConnector, influxHost, influxDbName, influxUser, 
 			return
 		}
 
-		logger.Infof("Query result: %+v", response.Results)
+		logger.Infof("Query result: %#v", response.Results)
+		logger.Infof("Type: %T", response.Results[0].Series[0].Values[0][1])
 	} else {
 		logger.Errorf("Unable to execute test query: %s", err)
 		return
@@ -217,8 +217,24 @@ func migrateMysqlToInflux(mysqlConnector, influxHost, influxDbName, influxUser, 
 }
 
 func influxStoreDataRunner() {
-	var rd radioData
-	var sd sensorDataCombined
+	var (
+		rd radioData
+		sd sensorDataCombined
+
+		fieldNames = []string{
+			"co2", "humidity", "light", "pressure", "sound_pressure", "temperature", "tvoc", "uv",
+		}
+		testFields = map[string]int{
+			"co2":            0,
+			"humidity":       0,
+			"light":          0,
+			"pressure":       0,
+			"sound_pressure": 0,
+			"temperature":    0,
+			"tvoc":           0,
+			"uv":             0,
+		}
+	)
 
 	logger.Info("Starting InfluxDB data storage thread.")
 
@@ -267,20 +283,30 @@ func influxStoreDataRunner() {
 			if len(res[0].Series) > 0 && len(res[0].Series[0].Values) > 0 {
 				row := res[0].Series[0].Values[0]
 
-				if row[1] == sd.co2 && row[2] == sd.humidity && row[3] == sd.light && row[4] == sd.pressure &&
-					row[5] == sd.soundPressure && row[6] == sd.temperature && row[7] == sd.tvoc && row[8] == sd.uv {
+				for i, dp := range fieldNames {
+					testFields[dp] = 0
+
+					if dpi, ok := row[i+1].(json.Number); ok {
+						dpv, _ := dpi.Int64()
+						testFields[dp] = int(dpv)
+					}
+				}
+
+				if testFields["co2"] == sd.co2 && testFields["humidity"] == sd.humidity && testFields["light"] == sd.light &&
+					testFields["pressure"] == sd.pressure && testFields["sound_pressure"] == sd.soundPressure &&
+					testFields["temperature"] == sd.temperature && testFields["tvoc"] == sd.tvoc && testFields["uv"] == sd.uv {
 					//
 					logger.Info("Multiple entries detected. Doing nothing for now.")
 				} else {
-					logger.Info("Row with different data detected! [%s] (%d)", rd.NodeMacAddress, rd.SequenceNumber)
-					logger.Infof("  [co2] %d vs %d", row[1], sd.co2)
-					logger.Infof("  [humidity] %d vs %d", row[2], sd.humidity)
-					logger.Infof("  [light] %d vs %d", row[3], sd.light)
-					logger.Infof("  [pressure] %d vs %d", row[4], sd.pressure)
-					logger.Infof("  [noise] %d vs %d", row[5], sd.soundPressure)
-					logger.Infof("  [temperature] %d vs %d", row[6], sd.temperature)
-					logger.Infof("  [voc] %d vs %d", row[7], sd.tvoc)
-					logger.Infof("  [uv] %d vs %d", row[8], sd.uv)
+					logger.Infof("Row with different data detected! [%s] (%d)", rd.NodeMacAddress, rd.SequenceNumber)
+					logger.Infof("  [co2] %d vs %d", testFields["co2"], sd.co2)
+					logger.Infof("  [humidity] %d vs %d", testFields["humidity"], sd.humidity)
+					logger.Infof("  [light] %d vs %d", testFields["light"], sd.light)
+					logger.Infof("  [pressure] %d vs %d", testFields["pressure"], sd.pressure)
+					logger.Infof("  [noise] %d vs %d", testFields["sound_pressure"], sd.soundPressure)
+					logger.Infof("  [temperature] %d vs %d", testFields["temperature"], sd.temperature)
+					logger.Infof("  [voc] %d vs %d", testFields["voc"], sd.tvoc)
+					logger.Infof("  [uv] %d vs %d", testFields["uv"], sd.uv)
 				}
 			}
 
@@ -294,28 +320,28 @@ func influxStoreDataRunner() {
 			}
 
 			tags := map[string]string{
-				"node_mac_address": "",
-				"sequence_number":  "",
+				"node_mac_address": rd.NodeMacAddress,
+				"sequence_number":  strconv.FormatInt(int64(rd.SequenceNumber), 10),
 			}
 			fields := map[string]interface{}{
-				"radio_bus_id":   0,
-				"channel":        0,
-				"packet_type":    0,
-				"timestamp_tz":   "",
-				"v_bat":          0,
-				"vcc":            0,
-				"temperature":    0,
-				"humidity":       0,
-				"pressure":       0,
-				"co2":            0,
-				"tvoc":           0,
-				"light":          0,
-				"uv":             0,
-				"sound_pressure": 0,
-				"port_input":     0,
-				"mag":            0,
-				"acc":            0,
-				"gyro":           0,
+				"radio_bus_id":   rd.RadioBusID,
+				"channel":        rd.Channel,
+				"packet_type":    rd.PacketType,
+				"timestamp_tz":   rd.TimestampTz,
+				"v_bat":          sd.vBat,
+				"vcc":            sd.vcc,
+				"temperature":    sd.temperature,
+				"humidity":       sd.humidity,
+				"pressure":       sd.pressure,
+				"co2":            sd.co2,
+				"tvoc":           sd.tvoc,
+				"light":          sd.light,
+				"uv":             sd.uv,
+				"sound_pressure": sd.soundPressure,
+				"port_input":     sd.portInput,
+				"mag":            sd.mag.string(),
+				"acc":            sd.acc.string(),
+				"gyro":           sd.gyro.string(),
 			}
 
 			pt, err := client.NewPoint("radio_datas", tags, fields, t)
@@ -339,6 +365,8 @@ func influxStoreDataRunner() {
 }
 
 func queryInfluxDB(clnt client.Client, cmd string) (res []client.Result, err error) {
+	logger.Infof("Executing query: %s", cmd)
+
 	q := client.Query{
 		Command:  cmd,
 		Database: dbData["DB_NAME"],
