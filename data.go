@@ -120,16 +120,16 @@ type sensorDataCombined struct {
 type radioData struct {
 	RadioBusID int `json:"radiobusid"`
 	Channel    int `json:"channel"`
-	//SpreadingFactor int          `json:"spreadingfactor"`
-	//Rssi            int          `json:"RSSI"`
-	//Snr             int          `json:"SNR"`
 	NodeMacAddress string `json:"node_mac_address"`
 	PacketType     int    `json:"packet_type"`
 	SequenceNumber int    `json:"sequencenumber"`
+	TimestampTz string       `json:"TimeStampTZ"`
+	Sensors     []sensorData `json:"Sensors"`
+	//SpreadingFactor int          `json:"spreadingfactor"`
+	//Rssi            int          `json:"RSSI"`
+	//Snr             int          `json:"SNR"`
 	//PayloadLength   int          `json:"payloadlength"`
 	//Payload         string       `json:"payload"`
 	//CombinedRssiSnr float64      `json:"combined_rssi_snr"`
 	//Timestamp   string       `json:"TimeStamp"`
-	TimestampTz string       `json:"TimeStampTZ"`
-	Sensors     []sensorData `json:"Sensors"`
 }
