@@ -31,6 +31,8 @@ func mysqlStoreDataRunner() {
 	}
 	defer db.Close()
 
+	db.SetMaxOpenConns(1000)
+
 	stmtInsert, err := db.Prepare(
 		"INSERT INTO radio_datas (" +
 			"`radio_bus_id`, `channel`, `node_mac_address`, `packet_type`, `sequence_number`," +
@@ -47,11 +49,13 @@ func mysqlStoreDataRunner() {
 		return
 	}
 
-	stmtSelect, err := db.Prepare(
-		"SELECT `co2`, `humidity`, `light`, `pressure`, `sound_pressure`, `temperature`, `tvoc`, `uv` " +
-			"FROM radio_datas " +
-			"WHERE `node_mac_address` = ? AND `sequence_number` = ?")
-	defer stmtSelect.Close()
+	/*
+		stmtSelect, err := db.Prepare(
+			"SELECT `co2`, `humidity`, `light`, `pressure`, `sound_pressure`, `temperature`, `tvoc`, `uv` " +
+				"FROM radio_datas " +
+				"WHERE `node_mac_address` = ? AND `sequence_number` = ?")
+		defer stmtSelect.Close()
+	*/
 
 	if err != nil {
 		logger.Errorf("Error preparing statement: %s", err)
@@ -80,7 +84,14 @@ func mysqlStoreDataRunner() {
 				continue
 			}
 
-			rows, err := stmtSelect.Query(rd.NodeMacAddress, rd.SequenceNumber)
+			//rows, err := stmtSelect.Query(rd.NodeMacAddress, rd.SequenceNumber)
+			rows, err := db.Query(
+				"SELECT `co2`, `humidity`, `light`, `pressure`, `sound_pressure`, `temperature`, `tvoc`, `uv` "+
+					"FROM radio_datas "+
+					"WHERE `node_mac_address` = ? AND `sequence_number` = ?",
+				rd.NodeMacAddress, rd.SequenceNumber,
+			)
+			defer rows.Close()
 
 			if err != nil {
 				logger.Errorf("Error querying data: %s", err)
@@ -131,7 +142,7 @@ func mysqlStoreDataRunner() {
 			logger.Info("Shutting down storeDataRunner.")
 			return
 		default:
-			time.Sleep(10 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 	}
 }

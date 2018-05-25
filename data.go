@@ -36,7 +36,7 @@ var (
 	domain    = ""
 	host      = ""
 	port      = 3333
-	rdStore   = make(chan radioData, 20)
+	rdStore   = make(chan radioData, 1000)
 	saveData  = false
 	webDomain = ""
 	webHost   = ""
@@ -118,13 +118,13 @@ type sensorDataCombined struct {
 }
 
 type radioData struct {
-	RadioBusID int `json:"radiobusid"`
-	Channel    int `json:"channel"`
-	NodeMacAddress string `json:"node_mac_address"`
-	PacketType     int    `json:"packet_type"`
-	SequenceNumber int    `json:"sequencenumber"`
-	TimestampTz string       `json:"TimeStampTZ"`
-	Sensors     []sensorData `json:"Sensors"`
+	RadioBusID     int          `json:"radiobusid"`
+	Channel        int          `json:"channel"`
+	NodeMacAddress string       `json:"node_mac_address"`
+	PacketType     int          `json:"packet_type"`
+	SequenceNumber int          `json:"sequencenumber"`
+	TimestampTz    string       `json:"TimeStampTZ"`
+	Sensors        []sensorData `json:"Sensors"`
 	//SpreadingFactor int          `json:"spreadingfactor"`
 	//Rssi            int          `json:"RSSI"`
 	//Snr             int          `json:"SNR"`

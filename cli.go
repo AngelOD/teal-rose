@@ -234,8 +234,14 @@ func handleVersionCli(args []string, options map[string]string) int {
 	return 0
 }
 
-func loadDotEnv() bool {
-	envPath, err := getConfigPath(".env")
+func loadDotEnv(envNames ...string) bool {
+	envName := ".env"
+
+	if len(envNames) > 0 {
+		envName = envNames[0]
+	}
+
+	envPath, err := getConfigPath(envName)
 	if err != nil {
 		logger.Error(err)
 		return false
