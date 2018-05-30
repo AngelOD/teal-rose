@@ -68,7 +68,7 @@ func mysqlStoreDataRunner() {
 	for {
 		select {
 		case rd = <-rdStore:
-			logger.Info("Data found!")
+			//logger.Info("Data found!")
 
 			sd = rd.getSensorData()
 
